@@ -168,7 +168,7 @@ function doOnLoad() {
     
 
     if (state != "game") return;
-    if (config.get("showPingFPS", true)) pingFPS();
+    if (config.get("showPingFPS", true)) refreshLoop();
     
     setInterval(() => {
         let ele = document.querySelector("#app > div.interface.text-2 > div.team-section > div.player > div > div.head-right > div.nickname");
@@ -258,25 +258,11 @@ window.addEventListener('keydown', function(event) {
     }
 });
 
-let ping;
 const times = [];
 let fps = 0;
 
-function pingFPS() {
-    console.log("Starting Ping & FPS")
-    setInterval(() => {
-        let t1= Date.now()
-        fetch(window.location.href)
-        .then((res) => {
-            ping = Date.now() - t1
-        })
-    }, 2500)
-
-    refreshLoop()
-}
-
 function refreshLoop() {
-    updatePingFPS(ping, fps);
+    updatePingFPS(fps);
 
     window.requestAnimationFrame(() => {
         const now = performance.now();
@@ -290,7 +276,7 @@ function refreshLoop() {
     });
 }
 
-function updatePingFPS(ping, fps) {
+function updatePingFPS(fps) {
     leftIcons = document.querySelector('.state-cont');
     if (leftIcons === null) return;
     if (pingFPSdiv === null) {
@@ -300,7 +286,7 @@ function updatePingFPS(ping, fps) {
     if (!config.get("showPingFPS", true)) {
         pingFPSdiv.innerText = ``
     } else {
-        pingFPSdiv.innerText = `Ping: ${ping} ms\nFPS: ${fps}`
+        pingFPSdiv.innerText = `FPS: ${fps}`
     }
 }
 

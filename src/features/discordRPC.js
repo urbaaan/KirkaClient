@@ -75,10 +75,9 @@ function startrpc(gameurl) {
 
 function get_matches(gamecode) {
     return new Promise((resolve, reject) => {
-        fetch('https://kirkaclient.vercel.app/api/matches', options)
-        .then(res => res.text())
-        .then(text => {
-            let data = JSON.parse(text);
+        fetch('https://kirkaclient.herokuapp.com/api/matches', options)
+        .then(res => res.json())
+        .then(data => {
             text = data.ffa;
             let found = false;
             let finaldata;
