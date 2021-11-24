@@ -1,5 +1,5 @@
 const { ipcRenderer } = require('electron');
-const Store = require("electron-store");
+const Store = require('electron-store');
 const config = new Store();
 const tips = [
     'Click F4 to copy game URL to your clipboard!',
@@ -14,17 +14,17 @@ const tips = [
 ];
 
 window.addEventListener('DOMContentLoaded', () => {
-    let startVideo = document.getElementById("myVideo");
-    if (config.get("muteVideo", false)) {
+    const startVideo = document.getElementById('myVideo');
+    if (config.get('muteVideo', false))
         startVideo.muted = true;
-    }
+
     startVideo.play();
 
     const tiptext = document.getElementById('tips');
-    ipcRenderer.on('tip', (event) => {
-        let tip = tips[Math.floor(Math.random()*tips.length)];
+    ipcRenderer.on('tip', () => {
+        const tip = tips[Math.floor(Math.random() * tips.length)];
         tiptext.innerText = tip;
-    })
+    });
 
     const message = document.getElementById('status');
     ipcRenderer.on('message', (event, messageText = '') => {

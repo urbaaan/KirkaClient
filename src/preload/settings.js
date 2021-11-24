@@ -1,35 +1,35 @@
-const allSettings = require('../features/customSettings')
-const {ipcRenderer} = require('electron');
+const allSettings = require('../features/customSettings');
+const { ipcRenderer } = require('electron');
 
-ipcRenderer.on('make-settings', (event) => {
-    makeSettings()
-})
+ipcRenderer.on('make-settings', () => {
+    makeSettings();
+});
 
 let table;
 
 window.addEventListener('DOMContentLoaded', () => {
-    let check = document.getElementsByClassName("about-wrapper")
+    const check = document.getElementsByClassName('about-wrapper');
     if (check.length > 0) return;
-    table = document.getElementsByTagName("table")[0]
+    table = document.getElementsByTagName('table')[0];
     console.log(table);
-    makeSettings()
-})
+    makeSettings();
+});
 
 function makeSettings() {
-    let doneCategories = [];
+    const doneCategories = [];
     console.log(allSettings);
     for (let i = 0; i < allSettings.length; i++) {
-        let option = allSettings[i];
+        const option = allSettings[i];
         if (doneCategories.includes(option.category)) continue;
 
-        let mainDiv = document.createElement('div');
-        let category = document.createElement('label');
+        const mainDiv = document.createElement('div');
+        const category = document.createElement('label');
 
-        category.innerHTML = `<b>${option.category}</b>`
+        category.innerHTML = `<b>${option.category}</b>`;
         category.className = 'cat';
 
         mainDiv.id = option.category;
-        mainDiv.className = 'catDIV'
+        mainDiv.className = 'catDIV';
 
         mainDiv.appendChild(category);
         table.appendChild(mainDiv);
@@ -38,12 +38,12 @@ function makeSettings() {
     }
 
     for (let i = 0; i < allSettings.length; i++) {
-        let option = allSettings[i];
-        let tableRow = document.createElement('tr')
-        let tempHTML = ''
+        const option = allSettings[i];
+        const tableRow = document.createElement('tr');
+        let tempHTML = '';
         switch (option.type) {
-            case 'checkbox':
-                tempHTML = `
+        case 'checkbox':
+            tempHTML = `
                 <td>
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
@@ -55,9 +55,9 @@ function makeSettings() {
                     </label>                  
                 </td>
                 `;
-                break;
-            case 'input':
-                tempHTML = `
+            break;
+        case 'input':
+            tempHTML = `
                 <td>
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
@@ -68,14 +68,15 @@ function makeSettings() {
                         <span class="textbox"></span>
                     </label>                  
                 </td>
-                `
-                break;
-            case 'list':
-                let allOptions = ''
-                for (let i = 0; i < option.values.length; i++) {
-                    allOptions += `<option value="${option.values[i]}" ${option.values[i] == option.val ? 'selected': ''}>${option.values[i]}</option>`
-                }
-                tempHTML = `
+                `;
+            break;
+        case 'list':
+            // eslint-disable-next-line no-case-declarations
+            let allOptions = '';
+            for (let j = 0; j < option.values.length; j++)
+                allOptions += `<option value="${option.values[j]}" ${option.values[j] == option.val ? 'selected' : ''}>${option.values[j]}</option>`;
+
+            tempHTML = `
                 <td>
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
@@ -86,10 +87,10 @@ function makeSettings() {
                         </select>
                     </label>             
                 </td>
-                `
-                break;
-            case 'slider':
-                tempHTML = `
+                `;
+            break;
+        case 'slider':
+            tempHTML = `
                 <td>
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
@@ -102,16 +103,15 @@ function makeSettings() {
                         oninput="sliderVal('${option.id}')">
                     </div>               
                 </td>
-                `
+                `;
         }
-        let category = document.getElementById(option.category);
+        const category = document.getElementById(option.category);
         category.appendChild(tableRow);
         tableRow.innerHTML = tempHTML;
     }
-    let endNote = document.createElement('tr')
+    const endNote = document.createElement('tr');
     endNote.innerHTML = `<td>
                         <label id="name">\n\n<span style="color: #eb5656">*</span> Requires Restart</label>
-                        </td>`
-    table.appendChild(endNote)
-
+                        </td>`;
+    table.appendChild(endNote);
 }

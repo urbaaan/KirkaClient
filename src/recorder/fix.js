@@ -1,4 +1,4 @@
-(function (name, definition) {
+(function(name, definition) {
     if (typeof define === 'function' && define.amd) { // RequireJS / AMD
         define(definition);
     } else if (typeof module !== 'undefined' && module.exports) { // CommonJS / Node.js
@@ -6,12 +6,12 @@
     } else { // Direct include
         window.ysFixWebmDuration = definition();
     }
-})('fix-webm-duration', function () {
+})('fix-webm-duration', function() {
     /*
      * This is the list of possible WEBM file sections by their IDs.
      * Possible types: Container, Binary, Uint, Int, String, Float, Date
      */
-    var sections = {
+    const sections = {
         0xa45dfa3: { name: 'EBML', type: 'Container' },
         0x286: { name: 'EBMLVersion', type: 'Uint' },
         0x2f7: { name: 'EBMLReadVersion', type: 'Uint' },
@@ -247,6 +247,7 @@
         this.name = name || 'Unknown';
         this.type = type || 'Unknown';
     }
+
     WebmBase.prototype.updateBySource = function() { };
     WebmBase.prototype.setSource = function(source) {
         this.source = source;
@@ -261,23 +262,26 @@
     function WebmUint(name, type) {
         WebmBase.call(this, name, type || 'Uint');
     }
+
     doInherit(WebmUint, WebmBase);
+
     function padHex(hex) {
         return hex.length % 2 === 1 ? '0' + hex : hex;
     }
+
     WebmUint.prototype.updateBySource = function() {
         // use hex representation of a number instead of number value
         this.data = '';
-        for (var i = 0; i < this.source.length; i++) {
-            var hex = this.source[i].toString(16);
+        for (let i = 0; i < this.source.length; i++) {
+            const hex = this.source[i].toString(16);
             this.data += padHex(hex);
         }
     };
     WebmUint.prototype.updateByData = function() {
-        var length = this.data.length / 2;
+        const length = this.data.length / 2;
         this.source = new Uint8Array(length);
-        for (var i = 0; i < length; i++) {
-            var hex = this.data.substr(i * 2, 2);
+        for (let i = 0; i < length; i++) {
+            const hex = this.data.substr(i * 2, 2);
             this.source[i] = parseInt(hex, 16);
         }
     };
@@ -291,20 +295,21 @@
     function WebmFloat(name, type) {
         WebmBase.call(this, name, type || 'Float');
     }
+
     doInherit(WebmFloat, WebmBase);
     WebmFloat.prototype.getFloatArrayType = function() {
         return this.source && this.source.length === 4 ? Float32Array : Float64Array;
     };
     WebmFloat.prototype.updateBySource = function() {
-        var byteArray = this.source.reverse();
-        var floatArrayType = this.getFloatArrayType();
-        var floatArray = new floatArrayType(byteArray.buffer);
+        const byteArray = this.source.reverse();
+        const floatArrayType = this.getFloatArrayType();
+        const floatArray = new floatArrayType(byteArray.buffer);
         this.data = floatArray[0];
     };
     WebmFloat.prototype.updateByData = function() {
-        var floatArrayType = this.getFloatArrayType();
-        var floatArray = new floatArrayType([ this.data ]);
-        var byteArray = new Uint8Array(floatArray.buffer);
+        const floatArrayType = this.getFloatArrayType();
+        const floatArray = new floatArrayType([ this.data ]);
+        const byteArray = new Uint8Array(floatArray.buffer);
         this.source = byteArray.reverse();
     };
     WebmFloat.prototype.getValue = function() {
@@ -317,15 +322,16 @@
     function WebmContainer(name, type) {
         WebmBase.call(this, name, type || 'Container');
     }
+
     doInherit(WebmContainer, WebmBase);
     WebmContainer.prototype.readByte = function() {
         return this.source[this.offset++];
     };
     WebmContainer.prototype.readUint = function() {
-        var firstByte = this.readByte();
-        var bytes = 8 - firstByte.toString(2).length;
-        var value = firstByte - (1 << (7 - bytes));
-        for (var i = 0; i < bytes; i++) {
+        const firstByte = this.readByte();
+        const bytes = 8 - firstByte.toString(2).length;
+        let value = firstByte - (1 << (7 - bytes));
+        for (let i = 0; i < bytes; i++) {
             // don't use bit operators to support x86
             value *= 256;
             value += this.readByte();
@@ -335,25 +341,25 @@
     WebmContainer.prototype.updateBySource = function() {
         this.data = [];
         for (this.offset = 0; this.offset < this.source.length; this.offset = end) {
-            var id = this.readUint();
-            var len = this.readUint();
+            const id = this.readUint();
+            const len = this.readUint();
             var end = Math.min(this.offset + len, this.source.length);
-            var data = this.source.slice(this.offset, end);
+            const data = this.source.slice(this.offset, end);
 
-            var info = sections[id] || { name: 'Unknown', type: 'Unknown' };
-            var ctr = WebmBase;
+            const info = sections[id] || { name: 'Unknown', type: 'Unknown' };
+            let ctr = WebmBase;
             switch (info.type) {
-                case 'Container':
-                    ctr = WebmContainer;
-                    break;
-                case 'Uint':
-                    ctr = WebmUint;
-                    break;
-                case 'Float':
-                    ctr = WebmFloat;
-                    break;
+            case 'Container':
+                ctr = WebmContainer;
+                break;
+            case 'Uint':
+                ctr = WebmUint;
+                break;
+            case 'Float':
+                ctr = WebmFloat;
+                break;
             }
-            var section = new ctr(info.name, info.type);
+            const section = new ctr(info.name, info.type);
             section.setSource(data);
             this.data.push({
                 id: id,
@@ -366,10 +372,10 @@
         for (var bytes = 1, flag = 0x80; x >= flag && bytes < 8; bytes++, flag *= 0x80) { }
 
         if (!draft) {
-            var value = flag + x;
-            for (var i = bytes - 1; i >= 0; i--) {
+            let value = flag + x;
+            for (let i = bytes - 1; i >= 0; i--) {
                 // don't use bit operators to support x86
-                var c = value % 256;
+                const c = value % 256;
                 this.source[this.offset + i] = c;
                 value = (value - c) / 256;
             }
@@ -379,32 +385,31 @@
     };
     WebmContainer.prototype.writeSections = function(draft) {
         this.offset = 0;
-        for (var i = 0; i < this.data.length; i++) {
-            var section = this.data[i],
+        for (let i = 0; i < this.data.length; i++) {
+            const section = this.data[i],
                 content = section.data.source,
                 contentLength = content.length;
             this.writeUint(section.id, draft);
             this.writeUint(contentLength, draft);
-            if (!draft) {
+            if (!draft)
                 this.source.set(content, this.offset);
-            }
+
             this.offset += contentLength;
         }
         return this.offset;
     };
     WebmContainer.prototype.updateByData = function() {
         // run without accessing this.source to determine total length - need to know it to create Uint8Array
-        var length = this.writeSections('draft');
+        const length = this.writeSections('draft');
         this.source = new Uint8Array(length);
         // now really write data
         this.writeSections();
     };
     WebmContainer.prototype.getSectionById = function(id) {
-        for (var i = 0; i < this.data.length; i++) {
-            var section = this.data[i];
-            if (section.id === id) {
+        for (let i = 0; i < this.data.length; i++) {
+            const section = this.data[i];
+            if (section.id === id)
                 return section.data;
-            }
         }
         return null;
     };
@@ -413,27 +418,28 @@
         WebmContainer.call(this, 'File', 'File');
         this.setSource(source);
     }
+
     doInherit(WebmFile, WebmContainer);
     WebmFile.prototype.fixDuration = function(duration) {
-        var segmentSection = this.getSectionById(0x8538067);
+        const segmentSection = this.getSectionById(0x8538067);
         if (!segmentSection) {
             console.log('[fix-webm-duration] Segment section is missing');
             return false;
         }
 
-        var infoSection = segmentSection.getSectionById(0x549a966);
+        const infoSection = segmentSection.getSectionById(0x549a966);
         if (!infoSection) {
             console.log('[fix-webm-duration] Info section is missing');
             return false;
         }
 
-        var timeScaleSection = infoSection.getSectionById(0xad7b1);
+        const timeScaleSection = infoSection.getSectionById(0xad7b1);
         if (!timeScaleSection) {
             console.log('[fix-webm-duration] TimecodeScale section is missing');
             return false;
         }
 
-        var durationSection = infoSection.getSectionById(0x489);
+        let durationSection = infoSection.getSectionById(0x489);
         if (durationSection) {
             if (durationSection.getValue() <= 0) {
                 console.log('[fix-webm-duration] Duration section is present, but the value is empty');
@@ -467,13 +473,12 @@
 
     return function(blob, duration, callback) {
         try {
-            var reader = new FileReader();
+            const reader = new FileReader();
             reader.onloadend = function() {
                 try {
-                    var file = new WebmFile(new Uint8Array(reader.result));
-                    if (file.fixDuration(duration)) {
+                    const file = new WebmFile(new Uint8Array(reader.result));
+                    if (file.fixDuration(duration))
                         blob = file.toBlob();
-                    }
                 } catch (ex) {
                     // ignore
                 }
