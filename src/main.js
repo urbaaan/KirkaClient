@@ -1,19 +1,63 @@
-//modules
-require("v8-compile-cache"); //For better startup
-const path = require("path");
-const { app, BrowserWindow, screen, clipboard, dialog, shell, globalShortcut, session, ipcMain } = require('electron');
-const electronLocalshortcut = require("electron-localshortcut");
-const Store = require("electron-store");
+// modules
+require('v8-compile-cache'); // For better startup
+const path = require('path');
+const { app, BrowserWindow, clipboard, dialog, ipcMain } = require('electron');
+const electronLocalshortcut = require('electron-localshortcut');
+const Store = require('electron-store');
 const config = new Store();
-const { DiscordClient, InitRPC } = require('./features/discordRPC')
+const { InitRPC, sendMatches } = require('./features/discordRPC');
 const { autoUpdate } = require('./features/autoUpdate');
+const { sendBadges, initBadges } = require('./features/badges');
+const { io } = require('socket.io-client');
+const socket = io('https://kirkaclient.herokuapp.com/');
 
-if (require("electron-squirrel-startup")) {
+const gamePreload = path.resolve(__dirname + '/preload/global.js');
+const splashPreload = path.resolve(__dirname + '/preload/splash.js');
+const settingsPreload = path.resolve(__dirname + '/preload/settings.js');
+
+let win;
+let splash;
+let canDestroy = false;
+let updateContent;
+
+socket.on('connect', () => {
+    console.log('WebSocket Connected!');
+    initBadges(socket);
+    const engine = socket.io.engine;
+    engine.once('upgrade', () => {
+        console.log(engine.transport.name);
+    });
+    const channel = config.get('betaTester', true) ? 'beta' : 'stable';
+    socket.send({ type: 5, channel: channel });
+});
+
+socket.on('disconnect', () => {
+    console.log('WebSocket Disconnected!');
+});
+
+socket.on('message', (data) => {
+    switch (data.type) {
+    case 1:
+        socket.send({ type: 1, data: 'pong' });
+        break;
+    case 3:
+        sendMatches(data.data);
+        break;
+    case 4:
+        sendBadges(data.data);
+        break;
+    case 5:
+        updateContent = data.data;
+        break;
+    }
+});
+
+if (require('electron-squirrel-startup'))
     app.quit();
-}
-if (config.get('disableFrameRateLimit', false)) {
-    app.commandLine.appendSwitch('disable-frame-rate-limit')
-}
+
+if (config.get('disableFrameRateLimit', false))
+    app.commandLine.appendSwitch('disable-frame-rate-limit');
+
 app.commandLine.appendSwitch('disable-gpu-vsync');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('disable-breakpad');
@@ -29,22 +73,14 @@ app.commandLine.appendSwitch('disable-bundled-ppapi-flash');
 app.commandLine.appendSwitch('disable-logging');
 app.commandLine.appendSwitch('disable-web-security');
 
-let gamePreload = path.resolve(__dirname + '/preload/global.js')
-let splashPreload = path.resolve(__dirname + '/preload/splash.js')
-let settingsPreload = path.resolve(__dirname + '/preload/settings.js')
-
-let win;
-let splash;
-let canDestroy;
-
 function createWindow() {
     win = new BrowserWindow({
         width: 1280,
         height: 720,
         frame: false,
-        backgroundColor: "#000000",
+        backgroundColor: '#000000',
         titleBarStyle: 'hidden',
-		
+
         show: false,
         acceptFirstMouse: true,
         icon: icon,
@@ -64,25 +100,21 @@ function createWindow() {
     });
 
     win.webContents.on('new-window', function(event, url) {
-        event.preventDefault()
+        event.preventDefault();
         win.loadURL(url);
     });
 
-    if (config.get("enablePointerLockOptions", false)) {
-        app.commandLine.appendSwitch("enable-pointer-lock-options");
-    }
+    if (config.get('enablePointerLockOptions', false))
+        app.commandLine.appendSwitch('enable-pointer-lock-options');
 
-    let contents = win.webContents;
 
-    win.once("ready-to-show", () => {
+    const contents = win.webContents;
+
+    win.once('ready-to-show', () => {
         showWin();
-        if (config.get("discordRPC", true)) {
-            InitRPC();
-            DiscordClient(win.webContents);
-        }
-        if (config.get("chatType", "Show") !== "Show") {
+        InitRPC(socket, contents);
+        if (config.get('chatType', 'Show') !== 'Show')
             win.webContents.send('chat', false, true);
-        }
     });
 
     function showWin() {
@@ -91,9 +123,9 @@ function createWindow() {
             return;
         }
         splash.destroy();
-        if (config.get("fullScreenStart", true)) {
+        if (config.get('fullScreenStart', true))
             win.setFullScreen(true);
-        }
+
         win.show();
     }
 }
@@ -111,49 +143,49 @@ function createShortcutKeys() {
 }
 
 let chatState = false;
+
 function chatShowHide() {
-    let chatType = config.get("chatType", "Show")
+    const chatType = config.get('chatType', 'Show');
     return;
+    // eslint-disable-next-line no-unreachable
     switch (chatType) {
-        case 'Show':
-            break;
-        case 'Hide':
-            win.webContents.send('chat', false, false)
-            break;
-        case 'On-Focus':
-            break;
-            win.webContents.send('chat', chatState, false)
-            if (chatState) {
-                chatState = false;
-            } else {
-                chatState = true;
-            }
+    case 'Show':
+        break;
+    case 'Hide':
+        win.webContents.send('chat', false, false);
+        break;
+    case 'On-Focus':
+        break;
+        win.webContents.send('chat', chatState, false);
+        if (chatState)
+            chatState = false;
+        else
+            chatState = true;
+
     }
 }
 
 function checkkirka() {
     const urld = clipboard.readText();
-    if (urld.includes("https://kirka.io/games/")) {
+    if (urld.includes('https://kirka.io/games/'))
         win.loadURL(urld);
-    }
 }
 
 app.allowRendererProcessReuse = true;
 
 let icon;
 
-if (process.platform === "linux") {
-    icon = __dirname + "/media/icon.png"
-} else {
-    icon = __dirname + "/media/icon.ico"
-}
-console.log(icon)
+if (process.platform === 'linux')
+    icon = __dirname + '/media/icon.png';
+else
+    icon = __dirname + '/media/icon.ico';
+
+console.log(icon);
 app.whenReady().then(() => createSplashWindow());
 
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin')
         app.quit();
-    }
 });
 
 function createSplashWindow() {
@@ -164,7 +196,7 @@ function createSplashWindow() {
         resizable: false,
         frame: false,
         show: true,
-	    icon: icon,
+        icon: icon,
         transparent: true,
         alwaysOnTop: false,
         webPreferences: {
@@ -173,30 +205,37 @@ function createSplashWindow() {
             contextIsolation: false
         }
     });
-    splash.loadFile(`${__dirname}/splash/splash.html`);
 
-    autoUpdate(splash.webContents).then((didUpdate) => {
-        if (didUpdate) {
-            let options  = {
-                buttons: ["Ok"],
-                message: "Update Complete! Please relaunch the client."
-            }
-            dialog.showMessageBox(options)
-            .then(() => {
-                app.quit();
-            })
-        } else {
-            const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-            createWindow();
-            wait(10000).then(() => { 
-                canDestroy = true;
-            });
-        }
-    });
+    splash.loadFile(`${__dirname}/splash/splash.html`);
+    splash.webContents.on('dom-ready', () => initAutoUpdater(splash.webContents));
+}
+
+async function initAutoUpdater(webContents) {
+    if (updateContent === undefined) {
+        setTimeout(() => {
+            initAutoUpdater(webContents);
+        }, 100);
+        return;
+    }
+
+    const didUpdate = await autoUpdate(webContents, updateContent);
+    if (didUpdate) {
+        const options = {
+            buttons: ['Ok'],
+            message: 'Update Complete! Please relaunch the client.'
+        };
+        await dialog.showMessageBox(options);
+        app.quit();
+    } else {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        createWindow();
+        await wait(10000);
+        canDestroy = true;
+    }
 }
 
 function create_set() {
-    setwin = new BrowserWindow({
+    const setwin = new BrowserWindow({
         width: 1000,
         height: 600,
         show: false,
@@ -207,11 +246,11 @@ function create_set() {
             contextIsolation: false,
             enableRemoteModule: true,
             preload: settingsPreload
-          }
+        }
     });
     setwin.removeMenu();
-    setwin.loadFile(path.join(__dirname, "/settings/settings.html"));
-    //setwin.setResizable(false)
+    setwin.loadFile(path.join(__dirname, '/settings/settings.html'));
+    // setwin.setResizable(false)
 
     setwin.on('close', (event) => {
         event.preventDefault();
@@ -219,12 +258,11 @@ function create_set() {
     });
 
     ipcMain.on('show-settings', () => {
-        setwin.show()
-    })
+        setwin.show();
+    });
 
     setwin.once('ready-to-show', () => {
-        //setwin.show()
-        //setwin.webContents.openDevTools();
-    })
-
-};
+        // setwin.show()
+        // setwin.webContents.openDevTools();
+    });
+}

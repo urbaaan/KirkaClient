@@ -1,17 +1,13 @@
-const current_v = require('../../package.json').version
-
 module.exports.gameLoaded = (urlid) => {
     try {
-        if (urlid.includes("https://kirka.io/games/")) {
+        if (urlid.includes('https://kirka.io/games/'))
             return true;
-        } else {
+        else
             return false;
-        }
-    } 
-    catch(err) {
+    } catch (err) {
         console.log(err);
         return false;
     }
-}
+};
 
-module.exports.version = current_v;
+module.exports.version = require('../../package.json').version;

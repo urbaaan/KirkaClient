@@ -1,35 +1,51 @@
 const { gameLoaded, version } = require('./const');
-const client = require('discord-rich-presence')('871730144836976650');
-const fetch = require('node-fetch');
-let starttime = Date.now();
-const { badge_checker } = require('./badges')
-const Store = require("electron-store");
+const DiscordRPC = require('discord-rpc');
+const ClientID = '871730144836976650';
+const starttime = Date.now();
+const { badge_checker } = require('./badges');
+const Store = require('electron-store');
 const config = new Store();
-const https = require('https');
 
-let userBadges = {type:'smth', role:'KirkaClient User'}
-let playing = false;
+let userBadges = { type: 'anything', role: 'KirkaClient User' };
+let matches;
+let discordOpen = false;
 
-const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
+DiscordRPC.register(ClientID);
+const client = new DiscordRPC.Client({ transport: 'ipc' });
+client.login({ clientId: ClientID }).catch((error) => {
+    console.log(error);
 });
-let options = {agent: httpsAgent}
-
-setInterval(() => {
-	let user = config.get("user", "").toString();
-	if (user.slice(-1) === " ") {
-		user = user.slice(0, -1)
-	}
-	if (user !== "") {
-		userBadges = badge_checker(user)
-		userBadges = userBadges[0]
-		if (!playing) initrpc();
-	}
-}, 2500);
 
 
-function initrpc() {
-    client.updatePresence({
+client.on('ready', () => {
+    console.log(`RPC Ready! Username: ${client.user.username}#${client.user.discriminator}`);
+    discordOpen = true;
+});
+
+function initRPC(socket, webContents) {
+    if (config.get('discordRPC', true)) {
+        setInterval(() => {
+            if (!discordOpen) return;
+
+            socket.send({ type: 3 });
+            let user = config.get('user', '').toString();
+
+            if (user.slice(-1) === ' ') user = user.slice(0, -1);
+            if (user !== '') {
+                userBadges = badge_checker(user);
+                userBadges = userBadges[0];
+                const gameURL = webContents.getURL();
+                if (!gameLoaded(gameURL))
+                    notPlaying();
+                else
+                    updateRPC(gameURL);
+            }
+        }, 2500);
+    }
+}
+
+function notPlaying() {
+    client.setActivity({
         state: 'Home Page',
         smallImageKey: userBadges.type,
         smallImageText: userBadges.role,
@@ -38,119 +54,87 @@ function initrpc() {
         instance: true,
         startTimestamp: starttime,
         buttons: [
-          { label: "Get KirkaClient", url: "https://discord.gg/bD9JNv6GFS" }
+            { label: 'Get KirkaClient', url: 'https://discord.gg/bD9JNv6GFS' }
         ]
     });
 }
 
-function discord_client(webContents) {
-    setInterval(() => {
-        startrpc(webContents.getURL())
-    }, 2000);
+function sendMatches(data) {
+    matches = data;
 }
 
-function startrpc(gameurl) {
+async function updateRPC(gameurl) {
     let final_data;
-    if (gameLoaded(gameurl)) {
-		playing = true;
-        let gamecode = gameurl.replace("https://kirka.io/games/", "");
-        get_matches(gamecode)
-        .then((data) => {
-            if (data.mode == 'Editor') {
-                final_data = {mode:'Editing a map'}
-                updatenow(final_data, 'map');
-            } else {
-                final_data = {'mode':data.mode, 'map': data.map_name, 'cap': data.cap, 'code':gamecode}
-                updatenow(final_data, 'game');
-            }
-			
-        })
-        .catch((error) => {
-            console.err(error)
-        })
+
+    const gamecode = gameurl.replace('https://kirka.io/games/', '');
+    const data = await getMatches(gamecode);
+    let category;
+    if (data.mode == 'Editor') {
+        final_data = {
+            mode: 'Editing a map'
+        };
+        category = 'map';
     } else {
-		playing = false;
+        final_data = {
+            'mode': data.mode,
+            'map': data.map_name,
+            'cap': data.cap,
+            'code': gamecode
+        };
+        category = 'game';
     }
+    updateClient(final_data, category);
 }
 
-function get_matches(gamecode) {
-    return new Promise((resolve, reject) => {
-        fetch('https://kirkaclient.vercel.app/api/matches', options)
-        .then(res => res.text())
-        .then(text => {
-            let data = JSON.parse(text);
-            text = data.ffa;
-            let found = false;
-            let finaldata;
-            for (let key in text) {
-                let value =  text[key];
-                let map_name = value.metadata.mapName;
-                let cap = `${value.clients}/${value.maxClients}`;
-                let roomId = value.roomId;
-                if (roomId == gamecode) {
-                  finaldata = {map_name: map_name, cap: cap, mode:'FFA'};
-                  found = true;
-                  resolve(finaldata);
-                }
+async function getMatches(gamecode) {
+    let finaldata = null;
+    ['ffa', 'tdm'].forEach((mode) => {
+        const modeData = matches[mode];
+        for (const key in modeData) {
+            const value = modeData[key];
+            const roomId = value.roomId;
+            if (roomId == gamecode) {
+                finaldata = {
+                    map_name: value.metadata.mapName,
+                    cap: `${value.clients}/${value.maxClients}`,
+                    mode: mode.toUpperCase()
+                };
+                break;
             }
-            if (!found) {
-                text = data.tdm
-                for (let key in text) {
-                    let value =  text[key];
-                    let map_name = value.metadata.mapName;
-                    let cap = `${value.clients}/${value.maxClients}`;
-                    let roomId = value.roomId;
-                    if (roomId == gamecode) {
-                      finaldata = {map_name: map_name, cap: cap, mode:'TDM'};
-                      found = true;
-                      resolve(finaldata);
-                    }
-                }
-            }
-            if (!found) {
-                finaldata = {mode: 'Editor'};
-                resolve(finaldata);
-            }
-        });
-      })
+        }
+    });
+
+    return finaldata || { mode: 'Editor' };
 }
 
-function updatenow(data, type) {
+function updateClient(data, type) {
     if (data === undefined) return;
+    const updateData = {
+        smallImageKey: userBadges.type,
+        smallImageText: userBadges.role,
+        largeImageKey: 'client_logo',
+        largeImageText: `KirkaClient ${version}`,
+        instance: true,
+        startTimestamp: starttime,
+    };
     switch (type) {
-        case 'game':
-            client.updatePresence({
-                details: `Playing ${data.mode}`,
-                state: `${data.map} (${data.cap})`,
-                smallImageKey: userBadges.type,
-                smallImageText: userBadges.role,
-                largeImageKey: 'client_logo',
-                largeImageText: `KirkaClient ${version}`,
-                instance: true,
-                startTimestamp: starttime,
-                buttons: [
-                    { label: "Join Game", url: `https://kirka.io/games/${data.code}`},
-                    { label: "Get KirkaClient", url: "https://discord.gg/bD9JNv6GFS" }
-                  ]
-            });
-            break;
-        case 'map':
-            client.updatePresence({
-                details: `Editing a map`,
-                smallImageKey: userBadges.type,
-                smallImageText: userBadges.role,
-                largeImageKey: 'client_logo',
-                largeImageText: `KirkaClient ${version}`,
-                instance: true,
-                startTimestamp: starttime,
-                buttons: [
-                    { label: "Get KirkaClient", url: "https://discord.gg/bD9JNv6GFS" }
-                  ]
-            });
-            break;
+    case 'game':
+        updateData['buttons'] = [
+            { label: 'Join Game', url: `https://kirka.io/games/${data.code}` },
+            { label: 'Get KirkaClient', url: 'https://discord.gg/bD9JNv6GFS' }
+        ];
+        updateData['details'] = `Playing ${data.mode}`;
+        updateData['state'] = `${data.map} (${data.cap})`;
+        break;
+    case 'map':
+        updateData['buttons'] = [
+            { label: 'Get KirkaClient', url: 'https://discord.gg/bD9JNv6GFS' }
+        ];
+        updateData['details'] = 'Editing a map';
+        break;
     }
-
+    client.setActivity(updateData);
 }
 
-exports.DiscordClient = discord_client;
-exports.InitRPC = initrpc;
+module.exports.InitRPC = initRPC;
+module.exports.sendMatches = sendMatches;
