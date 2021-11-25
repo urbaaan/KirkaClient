@@ -5,9 +5,7 @@ const { app, BrowserWindow, clipboard, dialog, ipcMain } = require('electron');
 const electronLocalshortcut = require('electron-localshortcut');
 const Store = require('electron-store');
 const config = new Store();
-const { InitRPC, sendMatches } = require('./features/discordRPC');
-const { autoUpdate } = require('./features/autoUpdate');
-const { sendBadges, initBadges } = require('./features/badges');
+const { autoUpdate, sendBadges, sendMatches, startTwitch, initBadges, InitRPC } = require('./features');
 const { io } = require('socket.io-client');
 const socket = io('https://kirkaclient.herokuapp.com/');
 
@@ -113,6 +111,7 @@ function createWindow() {
     win.once('ready-to-show', () => {
         showWin();
         InitRPC(socket, contents);
+        startTwitch(contents);
         if (config.get('chatType', 'Show') !== 'Show')
             win.webContents.send('chat', false, true);
     });

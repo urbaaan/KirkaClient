@@ -77,5 +77,51 @@ module.exports = [
         min: 10,
         max: 1000,
         val: config.get('scopeSize', 400)
+    },
+    {
+        name: 'Bot Username',
+        id: 'botUsername',
+        category: 'Twitch',
+        type: 'input',
+        needsRestart: true,
+        placeholder: 'Twitch Bot\'s Username',
+        val: config.get('botUsername', '')
+    },
+    {
+        name: 'Bot OAuth',
+        id: 'botOAuth',
+        category: 'Twitch',
+        type: 'input',
+        password: true,
+        needsRestart: true,
+        placeholder: 'Twitch Bot\'s OAuth Token',
+        val: config.get('botOAuth', '')
+    },
+    {
+        name: 'Twitch Channel',
+        id: 'twitchChannel',
+        category: 'Twitch',
+        type: 'input',
+        needsRestart: true,
+        placeholder: 'Your Twitch channel\'s name.',
+        val: config.get('twitchChannel', '')
+    },
+    {
+        name: 'Link Command',
+        id: 'linkCommand',
+        category: 'Twitch',
+        type: 'input',
+        placeholder: 'Command to get the link of your game',
+        needsRestart: false,
+        val: config.get('linkCommand', '!link')
+    },
+    {
+        name: 'Link Message\n("<link" = Game\'s link)',
+        id: 'linkMessage',
+        category: 'Twitch',
+        type: 'input',
+        placeholder: '{link} = Gamelink. Client will auto-replace that.',
+        needsRestart: false,
+        val: config.get('linkMessage', 'Join here: {link}')
     }
 ];
