@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function makeSettings() {
     const doneCategories = [];
-    console.log(allSettings);
+
     for (let i = 0; i < allSettings.length; i++) {
         const option = allSettings[i];
         if (doneCategories.includes(option.category)) continue;
@@ -63,7 +63,7 @@ function makeSettings() {
                 <td>
                     <label class = "textbox">
                         <span class="textbox"></span>
-                        <input type="input" id=${option.id} ${option.placeholder ? `placeholder='${option.placeholder}'` : ''} value='${option.val}' oninput='inputbox("${option.id}")'>
+                        <input ${option.password ? 'type="password"' : 'type="input"'} '' id=${option.id} ${option.placeholder ? `placeholder='${option.placeholder}'` : ''} value='${option.val}' oninput='inputbox("${option.id}")'>
                         <span class="textbox"></span>
                     </label>                  
                 </td>

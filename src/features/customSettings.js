@@ -84,7 +84,7 @@ module.exports = [
         category: 'Twitch',
         type: 'input',
         needsRestart: true,
-        placeholder: 'Twitch Bot\'s Username',
+        placeholder: 'Twitch Bot Username',
         val: config.get('botUsername', '')
     },
     {
@@ -94,7 +94,7 @@ module.exports = [
         type: 'input',
         password: true,
         needsRestart: true,
-        placeholder: 'Twitch Bot\'s OAuth Token',
+        placeholder: 'Twitch Bot OAuth Token',
         val: config.get('botOAuth', '')
     },
     {
@@ -103,7 +103,7 @@ module.exports = [
         category: 'Twitch',
         type: 'input',
         needsRestart: true,
-        placeholder: 'Your Twitch channel\'s name.',
+        placeholder: 'Your Twitch channel name.',
         val: config.get('twitchChannel', '')
     },
     {
@@ -116,7 +116,7 @@ module.exports = [
         val: config.get('linkCommand', '!link')
     },
     {
-        name: 'Link Message\n("<link" = Game\'s link)',
+        name: 'Link Message',
         id: 'linkMessage',
         category: 'Twitch',
         type: 'input',
