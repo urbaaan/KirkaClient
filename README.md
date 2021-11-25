@@ -40,4 +40,4 @@ __Note:__ No PR to `master` or `beta` directly will be accepted!
 
 To support in development via code and/or funds, please join our discord server [here](https://discord.gg/bD9JNv6GFS).
 
-<iframe src="https://discord.com/widget?id=868890520468983819&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+![Discord Banner 4](https://discordapp.com/api/guilds/868890520468983819/widget.png?style=banner4)
