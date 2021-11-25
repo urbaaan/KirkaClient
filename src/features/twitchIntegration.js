@@ -3,11 +3,13 @@ const config = new Store();
 
 let client;
 let webContents;
+let twitchRunning = false;
 
 function startTwitch(web) {
     if (config.get('botUsername', null) &&
     config.get('botOAuth', null) &&
-    config.get('twitchChannel', null)
+    config.get('twitchChannel', null) &&
+    config.get('twitchInt', false)
     ) {
         const tmi = require('tmi.js');
         const opts = {
@@ -23,9 +25,14 @@ function startTwitch(web) {
         client.on('message', onMessageHandler);
         client.on('connected', onConnectedHandler);
         webContents = web;
-        client.connect();
+        client.connect().catch((err) => console.log(err));
     } else
         console.log('Twitch Integration not running');
+}
+
+function closeTwitch() {
+    if (twitchRunning)
+        client.disconnect();
 }
 
 function onMessageHandler(target, context, msg, self) {
@@ -46,6 +53,8 @@ function onMessageHandler(target, context, msg, self) {
 
 function onConnectedHandler(addr, port) {
     console.log(`* Connected to ${addr}:${port}`);
+    twitchRunning = true;
 }
 
 module.exports.startTwitch = startTwitch;
+module.exports.closeTwitch = closeTwitch;

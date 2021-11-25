@@ -79,6 +79,14 @@ module.exports = [
         val: config.get('scopeSize', 400)
     },
     {
+        name: 'Twitch Integration',
+        id: 'twitchInt',
+        category: 'Twitch',
+        type: 'checkbox',
+        needsRestart: true,
+        val: config.get('twitchInt', false),
+    },
+    {
         name: 'Bot Username',
         id: 'botUsername',
         category: 'Twitch',

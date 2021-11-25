@@ -5,7 +5,7 @@ const { app, BrowserWindow, clipboard, dialog, ipcMain } = require('electron');
 const electronLocalshortcut = require('electron-localshortcut');
 const Store = require('electron-store');
 const config = new Store();
-const { autoUpdate, sendBadges, sendMatches, startTwitch, initBadges, InitRPC } = require('./features');
+const { autoUpdate, sendBadges, sendMatches, startTwitch, initBadges, initRPC, closeTwitch, closeRPC } = require('./features');
 const { io } = require('socket.io-client');
 const socket = io('https://kirkaclient.herokuapp.com/');
 
@@ -20,11 +20,6 @@ let updateContent;
 
 socket.on('connect', () => {
     console.log('WebSocket Connected!');
-    initBadges(socket);
-    const engine = socket.io.engine;
-    engine.once('upgrade', () => {
-        console.log(engine.transport.name);
-    });
     const channel = config.get('betaTester', true) ? 'beta' : 'stable';
     socket.send({ type: 5, channel: channel });
 });
@@ -110,7 +105,8 @@ function createWindow() {
 
     win.once('ready-to-show', () => {
         showWin();
-        InitRPC(socket, contents);
+        initRPC(socket, contents);
+        initBadges(socket);
         startTwitch(contents);
         if (config.get('chatType', 'Show') !== 'Show')
             win.webContents.send('chat', false, true);
@@ -179,12 +175,15 @@ if (process.platform === 'linux')
 else
     icon = __dirname + '/media/icon.ico';
 
-console.log(icon);
 app.whenReady().then(() => createSplashWindow());
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin')
+    if (process.platform !== 'darwin') {
+        socket.disconnect();
+        closeRPC();
+        closeTwitch();
         app.quit();
+    }
 });
 
 function createSplashWindow() {

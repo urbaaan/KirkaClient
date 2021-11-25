@@ -136,5 +136,11 @@ function updateClient(data, type) {
     client.setActivity(updateData);
 }
 
-module.exports.InitRPC = initRPC;
+function closeRPC() {
+    if (discordOpen)
+        client.clearActivity();
+}
+
+module.exports.initRPC = initRPC;
+module.exports.closeRPC = closeRPC;
 module.exports.sendMatches = sendMatches;
