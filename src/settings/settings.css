@@ -98,6 +98,10 @@ table {
 th td {
   border: 0px solid black;
 }
+
+td {
+  vertical-align: middle;
+}
   
 nav {
 	 position: absolute;
@@ -197,17 +201,21 @@ nav {
   position: relative;
 }
 
+body {
+  overflow-x: hidden;
+}
+
 .rangeSlider {
   -webkit-appearance: none; 
   appearance: none;
   width: 150px;
   height: 6px;
+  margin-left: 15px;
   display: inline;
   position: absolute;
   bottom: 2px; 
   background: #d3d3d3;
   outline: none; 
-  -webkit-transition: .2s; 
   transition: opacity .2s;
 }
 

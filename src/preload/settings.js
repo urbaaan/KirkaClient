@@ -43,9 +43,10 @@ function makeSettings() {
         switch (option.type) {
         case 'checkbox':
             tempHTML = `
-                <td>
+                <td width="350vw">
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
+                <td width="250vw">\u200b</td>
                 <td>
                     <label class = "toggle">
                         <span class="check"></span>
@@ -57,9 +58,10 @@ function makeSettings() {
             break;
         case 'input':
             tempHTML = `
-                <td>
+                <td width="350vw">
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
+                <td width="250vw">\u200b</td>
                 <td>
                     <label class = "textbox">
                         <span class="textbox"></span>
@@ -76,9 +78,10 @@ function makeSettings() {
                 allOptions += `<option value="${option.values[j]}" ${option.values[j] == option.val ? 'selected' : ''}>${option.values[j]}</option>`;
 
             tempHTML = `
-                <td>
+                <td width="350vw">
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
+                <td width="250vw">\u200b</td>
                 <td>
                     <label class = "textbox">
                         <select id="chatType" onchange='inputbox("${option.id}")'>
@@ -90,9 +93,10 @@ function makeSettings() {
             break;
         case 'slider':
             tempHTML = `
-                <td>
+                <td width="350vw">
                     <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
                 </td>
+                <td width="250vw">\u200b</td>
                 <td>
                     <div class="slidecontainer">
                     <label class="textbox" id="${option.id}-label">

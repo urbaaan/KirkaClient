@@ -121,7 +121,27 @@ function createWindow() {
             win.setFullScreen(true);
 
         win.show();
+        if (config.get('update', true))
+            showChangeLogs();
     }
+}
+
+function showChangeLogs() {
+    const changeLogsWin = new BrowserWindow({
+        width: 500,
+        height: 1200,
+        center: true,
+        resizable: false,
+        frame: false,
+        show: true,
+        icon: icon,
+        transparent: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    });
+    // WIP
 }
 
 function createShortcutKeys() {
@@ -259,7 +279,7 @@ function create_set() {
     });
 
     setwin.once('ready-to-show', () => {
-        // setwin.show()
+        // setwin.show();
         // setwin.webContents.openDevTools();
     });
 }
