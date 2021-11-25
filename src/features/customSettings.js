@@ -131,5 +131,22 @@ module.exports = [
         placeholder: '{link} = Gamelink. Client will auto-replace that.',
         needsRestart: false,
         val: config.get('linkMessage', 'Join here: {link}')
+    },
+    {
+        name: 'Updates Behaviour',
+        id: 'updateType',
+        category: 'Updates',
+        type: 'list',
+        values: ['Ask for download', 'Auto download'],
+        needsRestart: false,
+        val: config.get('updateType', 'Auto download')
+    },
+    {
+        name: 'Receive Beta Updates',
+        id: 'betaTester',
+        category: 'Updates',
+        type: 'checkbox',
+        needsRestart: true,
+        val: config.get('betaTester', false)
     }
 ];

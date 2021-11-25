@@ -1,5 +1,8 @@
 const https = require('follow-redirects').https;
 const { version } = require('./const');
+const { dialog } = require('electron');
+const Store = require('electron-store');
+const config = new Store();
 const fs = require('fs');
 const path = require('path');
 
@@ -14,6 +17,16 @@ async function autoUpdate(contents, updateData) {
 
     const latest = updateData.version;
     if (latest != version) {
+        if (config.get('updateType', 'Auto download') == 'Ask for download') {
+            const options = {
+                buttons: ['Yes', 'No'],
+                message: 'Update Found! Download and install now?'
+            };
+            const response = await dialog.showMessageBox(options);
+            if (response.response === 1)
+                return false;
+        }
+
         await downloadUpdate(contents, updateData);
         return true;
     } else {

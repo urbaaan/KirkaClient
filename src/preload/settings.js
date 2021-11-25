@@ -84,7 +84,7 @@ function makeSettings() {
                 <td width="250vw">\u200b</td>
                 <td>
                     <label class = "textbox">
-                        <select id="chatType" onchange='inputbox("${option.id}")'>
+                        <select id="${option.id}" onchange='inputbox("${option.id}")'>
                             ${allOptions}
                         </select>
                     </label>             

@@ -19,7 +19,7 @@ let updateContent;
 
 socket.on('connect', () => {
     console.log('WebSocket Connected!');
-    const channel = config.get('betaTester', true) ? 'beta' : 'stable';
+    const channel = config.get('betaTester', false) ? 'beta' : 'stable';
     socket.send({ type: 5, channel: channel });
 });
 
@@ -127,6 +127,8 @@ function createWindow() {
 }
 
 function showChangeLogs() {
+    return;
+    // eslint-disable-next-line no-unreachable
     const changeLogsWin = new BrowserWindow({
         width: 500,
         height: 1200,
