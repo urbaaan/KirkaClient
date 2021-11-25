@@ -1,5 +1,4 @@
-// modules
-require('v8-compile-cache'); // For better startup
+require('v8-compile-cache');
 const path = require('path');
 const { app, BrowserWindow, clipboard, dialog, ipcMain } = require('electron');
 const electronLocalshortcut = require('electron-localshortcut');
