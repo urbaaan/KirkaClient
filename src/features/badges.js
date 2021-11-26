@@ -1,10 +1,11 @@
 const Store = require('electron-store');
 const config = new Store();
 
-let badgesData = null;
+let badgesData;
 
 function initBadges(socket) {
     if (config.get('clientBadges', true)) {
+        socket.send({ type: 4 });
         setInterval(() => {
             socket.send({ type: 4 });
         }, 120000);
@@ -16,7 +17,7 @@ function sendBadges(data) {
 }
 
 function checkbadge(user) {
-    if (badgesData === null)
+    if (badgesData === undefined)
         return [{ start: false }];
 
     const tosend = [];
