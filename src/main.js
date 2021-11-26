@@ -37,6 +37,8 @@ socket.on('message', (data) => {
         break;
     case 4:
         sendBadges(data.data);
+        if (win)
+            win.webContents.send('badges', data.data);
         break;
     case 5:
         updateContent = data.data;
@@ -79,7 +81,8 @@ function createWindow() {
         webPreferences: {
             nodeIntergation: true,
             preload: gamePreload,
-            enableRemoteModule: true
+            enableRemoteModule: true,
+            contextIsolation: false
         },
     });
     createShortcutKeys();
