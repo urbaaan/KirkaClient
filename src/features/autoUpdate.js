@@ -9,7 +9,7 @@ const path = require('path');
 async function autoUpdate(contents, updateData) {
     contents.send('tip');
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-    wait(5000).then(() => {
+    wait(2500).then(() => {
         contents.send('tip');
     });
     contents.send('message', 'Checking for updates...');

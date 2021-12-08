@@ -14,6 +14,7 @@ const settingsPreload = path.resolve(__dirname + '/preload/settings.js');
 
 let win;
 let splash;
+let setwin;
 let canDestroy = false;
 let updateContent;
 
@@ -86,7 +87,6 @@ function createWindow() {
         },
     });
     createShortcutKeys();
-    create_set();
 
     win.loadURL('https://kirka.io/');
 
@@ -251,13 +251,21 @@ async function initAutoUpdater(webContents) {
     } else {
         const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
         createWindow();
-        await wait(10000);
+        await wait(5000);
         canDestroy = true;
     }
 }
 
-function create_set() {
-    const setwin = new BrowserWindow({
+ipcMain.on('show-settings', () => {
+    if (setwin) {
+        setwin.focus();
+        return;
+    }
+    createSettings();
+});
+
+function createSettings() {
+    setwin = new BrowserWindow({
         width: 1000,
         height: 600,
         show: false,
@@ -274,17 +282,12 @@ function create_set() {
     setwin.loadFile(path.join(__dirname, '/settings/settings.html'));
     // setwin.setResizable(false)
 
-    setwin.on('close', (event) => {
-        event.preventDefault();
-        setwin.hide();
-    });
-
-    ipcMain.on('show-settings', () => {
-        setwin.show();
-    });
-
     setwin.once('ready-to-show', () => {
-        // setwin.show();
+        setwin.show();
         // setwin.webContents.openDevTools();
+    });
+
+    setwin.on('close', () => {
+        setwin = null;
     });
 }

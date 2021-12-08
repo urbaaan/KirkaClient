@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const allSettings = require('../features/customSettings');
+const autoJoin = require('../features/autoJoin');
 const { ipcRenderer } = require('electron');
 
 ipcRenderer.on('make-settings', () => {
@@ -15,6 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function makeSettings() {
+    allSettings.push(...autoJoin.settings);
     const doneCategories = [];
 
     for (let i = 0; i < allSettings.length; i++) {
@@ -73,9 +76,16 @@ function makeSettings() {
             break;
         case 'list':
             // eslint-disable-next-line no-case-declarations
+            let optionValues;
+            if (option.isDynamic) {
+                const dynamicElement = document.getElementById(option.dynamicElement);
+                optionValues = option.values[dynamicElement.value];
+            } else
+                optionValues = option.values;
+            // eslint-disable-next-line no-case-declarations
             let allOptions = '';
-            for (let j = 0; j < option.values.length; j++)
-                allOptions += `<option value="${option.values[j]}" ${option.values[j] == option.val ? 'selected' : ''}>${option.values[j]}</option>`;
+            for (let j = 0; j < optionValues.length; j++)
+                allOptions += `<option value="${optionValues[j]}" ${optionValues[j] == option.val ? 'selected' : ''}>${optionValues[j]}</option>`;
 
             tempHTML = `
                 <td width="350vw">

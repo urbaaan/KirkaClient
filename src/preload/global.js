@@ -7,6 +7,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const getBlobDuration = require('get-blob-duration');
+const autoJoin = require('../features/autoJoin');
 
 let leftIcons;
 let pingFPSdiv = null;
@@ -239,6 +240,7 @@ function createBalloon(text, error = false) {
 }
 
 window.addEventListener('keydown', function(event) {
+    const autoJoinKey = config.get('AJ_keybind', 'F7');
     switch (event.key) {
     case 'F1':
         startRecording();
@@ -248,6 +250,20 @@ window.addEventListener('keydown', function(event) {
         break;
     case 'F3':
         stopRecording(false);
+        break;
+    case autoJoinKey:
+        autoJoin.launch().then(res => {
+            if (!res.success || res.found == 0) {
+                createBalloon('No Match Found!', true);
+                return;
+            }
+
+            const url = `https://kirka.io/games/${res.code}`;
+            setTimeout(() => {
+                console.log('Loading', url);
+                window.location.replace(url);
+            }, 0);
+        });
         break;
     }
 });
