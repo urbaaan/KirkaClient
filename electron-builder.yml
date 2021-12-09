@@ -1,6 +1,6 @@
-appId: "KirkaClient"
+appId: "io.kirka.kirkaclient"
 win:
-  artifactName: ${name}-setup-${arch}-v${version}.${ext}
+  artifactName: ${productName}-setup-${os}-${arch}-v${version}.${ext}
   target:
     - target: nsis
       arch:
@@ -15,7 +15,7 @@ linux:
         - ia32
   category: game
 nsis:
-  artifactName: ${name}-setup-${arch}-v${version}.${ext}
+  artifactName: ${productName}-setup-${os}-${arch}-v${version}.${ext}
   oneClick: false
   perMachine: true
   allowToChangeInstallationDirectory: true
