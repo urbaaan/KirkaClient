@@ -88,7 +88,7 @@ async function updateRPC(gameurl) {
 
 async function getMatches(gamecode) {
     let finaldata = null;
-    ['ffa', 'tdm'].forEach((mode) => {
+    ['ffa', 'tdm', 'knife only', 'parkour'].forEach((mode) => {
         const modeData = matches[mode];
         for (const key in modeData) {
             const value = modeData[key];

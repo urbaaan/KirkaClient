@@ -38,12 +38,12 @@ async function autoUpdate(contents, updateData) {
 async function downloadUpdate(contents, updateData) {
     const updateUrl = updateData.url;
     const updateSize = updateData.size;
-    const dest = path.join('./resources/app.asar');
+    const downloadDestination = path.join('./resources/app.asar');
     // const dest = './app.asar';
     let myreq;
 
     async function downloadFile() {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             myreq = https.get(updateUrl, (res) => {
                 res.setEncoding('binary');
 
@@ -54,21 +54,26 @@ async function downloadUpdate(contents, updateData) {
                     contents.send('message', `Downloading- ${percentage}% complete...`);
                 });
 
-                res.on('end', function() {
+                res.on('end', async() => {
                     process.noAsar = true;
-
-                    fs.writeFile(dest, a, 'binary', function(err) {
-                        if (err) console.log(err);
-                    });
-
-                    resolve();
+                    try {
+                        fs.writeFileSync(downloadDestination, a, 'binary');
+                        resolve('download complete');
+                    } catch (e) {
+                        dialog.showErrorBox('Permission Error!',
+                            'Please start client as Administrator.\nThis can be done by Right Click > Run as Administrator.');
+                        reject('EPERM');
+                    }
                 });
             });
         });
     }
 
-    await downloadFile();
-    myreq.end();
+    try {
+        await downloadFile();
+        myreq.end();
+    // eslint-disable-next-line no-empty
+    } catch (e) {}
 }
 
 module.exports.autoUpdate = autoUpdate;
