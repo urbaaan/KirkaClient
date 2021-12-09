@@ -6,6 +6,5 @@ data/
 resources/
 *.txt
 dist/
-*.yml
 *.asar
 version.*

@@ -1,0 +1,38 @@
+appId: "KirkaClient"
+win:
+  artifactName: ${name}-setup-${arch}-v${version}.${ext}
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+linux:
+  artifactName: ${productName}-portable-${os}-${arch}.${ext}
+  target:
+    - target: appImage
+      arch:
+        - x64
+        - ia32
+  category: game
+nsis:
+  artifactName: ${name}-setup-${arch}-v${version}.${ext}
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+files:
+  - "**/*"
+  - "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}"
+  - "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}"
+  - "!**/node_modules/*.d.ts"
+  - "!**/node_modules/.bin"
+  - "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}"
+  - "!.editorconfig"
+  - "!.eslintrc.yml"
+  - "!**/._*"
+  - "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}"
+  - "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}"
+  - "!**/{appveyor.yml,.travis.yml,circle.yml,.github}"
+  - "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+  - "!*.sh"
+  - "!*.txt"
+# compression: store
