@@ -79,6 +79,15 @@ module.exports = [
         val: config.get('scopeSize', 400)
     },
     {
+        name: 'Custom CSS',
+        id: 'css',
+        category: 'Game',
+        type: 'input',
+        needsRestart: true,
+        val: config.get('css', ''),
+        placeholder: 'CSS URL (http/https only)'
+    },
+    {
         name: 'Twitch Integration',
         id: 'twitchInt',
         category: 'Twitch',
