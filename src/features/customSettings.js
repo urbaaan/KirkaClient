@@ -43,12 +43,12 @@ module.exports = [
         val: config.get('clientBadges', true),
     },
     {
-        name: 'Show Ping & FPS',
-        id: 'showPingFPS',
+        name: 'Show FPS',
+        id: 'showFPS',
         category: 'Game',
         type: 'checkbox',
         needsRestart: false,
-        val: config.get('showPingFPS', true),
+        val: config.get('showFPS', true),
     },
     {
         name: 'In-game Chat Mode',

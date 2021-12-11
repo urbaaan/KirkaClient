@@ -10,7 +10,7 @@ const getBlobDuration = require('get-blob-duration');
 const autoJoin = require('../features/autoJoin');
 
 let leftIcons;
-let pingFPSdiv = null;
+let FPSdiv = null;
 let mediaRecorder = null;
 let filepath = '';
 let starttime;
@@ -146,11 +146,10 @@ function doOnLoad() {
     case 'home':
         promo = document.getElementsByClassName('left-interface')[0];
         promo.appendChild(div);
-        if (settings === null || settings === undefined) {
-            let canvas = document.getElementsByClassName('left-icons')[0];
-            canvas = canvas.children[0];
-            if (canvas === undefined) return;
-            canvas.insertAdjacentHTML('beforeend', '<div data-v-4f66c13e="" data-v-6be9607e="" id="clientSettings" class="icon-btn text-1" style="--i:3;"><div data-v-4f66c13e="" class="wrapper"><img data-v-b8de1e14="" data-v-4f66c13e="" src="https://media.discordapp.net/attachments/868890525871247450/875360498701447248/Pngtreelaptop_setting_gear_icon_vector_3664021.png" width="100%" height="auto"><div data-v-4f66c13e="" class="text-icon">CLIENT</div></div></div>');
+        if (!settings) {
+            const canvas = document.getElementById('left-icons');
+            if (!canvas) return;
+            canvas.insertAdjacentHTML('beforeend', '<div data-v-6be9607e="" id="clientSettings" class="icon-btn text-1" style="--i:3;" data-v-45658db6=""><div data-v-4f66c13e="" class="wrapper"><img data-v-b8de1e14="" data-v-4f66c13e="" src="https://media.discordapp.net/attachments/912303941449039932/913787350738407434/client_icon.png" width="90%" height="auto"><div data-v-4f66c13e="" class="text-icon">CLIENT</div></div></div>');
             settings = document.getElementById('clientSettings');
             settings.onclick = () => {
                 ipcRenderer.send('show-settings');
@@ -165,7 +164,7 @@ function doOnLoad() {
 
 
     if (state != 'game') return;
-    if (config.get('showPingFPS', true)) refreshLoop();
+    if (config.get('showFPS', true)) refreshLoop();
 
     setInterval(() => {
         const ele = document.querySelector('#app > div.interface.text-2 > div.team-section > div.player > div > div.head-right > div.nickname');
@@ -190,7 +189,7 @@ function doOnLoad() {
 }
 
 function resetVars() {
-    pingFPSdiv = null;
+    FPSdiv = null;
 }
 
 ipcRenderer.on('chat', (event, state, force) => {
@@ -272,7 +271,7 @@ const times = [];
 let fps = 0;
 
 function refreshLoop() {
-    updatePingFPS(fps);
+    updateFPS(fps);
 
     window.requestAnimationFrame(() => {
         const now = performance.now();
@@ -286,17 +285,17 @@ function refreshLoop() {
     });
 }
 
-function updatePingFPS(_fps) {
+function updateFPS(_fps) {
     leftIcons = document.querySelector('.state-cont');
     if (leftIcons === null) return;
-    if (pingFPSdiv === null) {
-        pingFPSdiv = document.createElement('div');
-        leftIcons.appendChild(pingFPSdiv);
+    if (FPSdiv === null) {
+        FPSdiv = document.createElement('div');
+        leftIcons.appendChild(FPSdiv);
     }
-    if (!config.get('showPingFPS', true))
-        pingFPSdiv.innerText = '';
+    if (!config.get('showFPS', true))
+        FPSdiv.innerText = '';
     else
-        pingFPSdiv.innerText = `FPS: ${_fps}`;
+        FPSdiv.innerText = `FPS: ${_fps}`;
 }
 
 window.addEventListener('mouseup', (e) => {

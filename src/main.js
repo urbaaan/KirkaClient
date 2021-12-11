@@ -8,6 +8,11 @@ const { autoUpdate, sendBadges, sendMatches, startTwitch, initBadges, initRPC, c
 const { io } = require('socket.io-client');
 const socket = io('https://kirkaclient.herokuapp.com/');
 
+const { ElectronBlocker } = require('@cliqz/adblocker-electron');
+const fs = require('fs');
+const easylist = fs.readFileSync(path.join(__dirname, 'easylist.txt'), 'utf-8');
+const blocker = ElectronBlocker.parse(easylist);
+
 const gamePreload = path.resolve(__dirname + '/preload/global.js');
 const splashPreload = path.resolve(__dirname + '/preload/splash.js');
 const settingsPreload = path.resolve(__dirname + '/preload/settings.js');
@@ -106,6 +111,7 @@ function createWindow() {
     const contents = win.webContents;
 
     win.once('ready-to-show', () => {
+        blocker.enableBlockingInSession(win.webContents.session);
         showWin();
         initRPC(socket, contents);
         initBadges(socket);
