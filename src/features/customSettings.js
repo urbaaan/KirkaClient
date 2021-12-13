@@ -20,11 +20,11 @@ module.exports = [
     },
     {
         name: 'Unlimited FPS',
-        id: 'disableFrameRateLimit',
+        id: 'unlimitedFPS',
         category: 'Performance',
         type: 'checkbox',
         needsRestart: true,
-        val: config.get('disableFrameRateLimit', false),
+        val: config.get('unlimitedFPS', false),
     },
     {
         name: 'Discord Rich Presence',

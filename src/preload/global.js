@@ -312,8 +312,14 @@ window.addEventListener('load', () => {
 
         for (const key in allpossible) {
             const nickname = allpossible[key];
-            if (nickname.innerHTML.toString().includes('clientbadge'))
-                continue;
+            if (nickname.innerHTML.toString().includes('clientbadge')) {
+                const children = nickname.children;
+                for (let i = 0; i < children.length; i++) {
+                    const child = children[i];
+                    if (String(child.src).includes('discord'))
+                        child.remove();
+                }
+            }
             let user = nickname.innerText.toString();
             const re = new RegExp(' ', 'g');
             user = user.replace(re, '');
@@ -588,7 +594,7 @@ function checkbadge(user) {
         const allTypes = Object.keys(badgesData);
         for (let i = 0; i < allTypes.length; i++) {
             const badgeType = allTypes[i];
-            console.log(badgeType);
+
             if (badgesData[badgeType].includes(user))
                 allPossible.push(badgeType);
         }

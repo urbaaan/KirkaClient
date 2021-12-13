@@ -55,8 +55,9 @@ socket.on('message', (data) => {
 if (require('electron-squirrel-startup'))
     app.quit();
 
-if (config.get('disableFrameRateLimit', false))
+if (config.get('unlimitedFPS', true))
     app.commandLine.appendSwitch('disable-frame-rate-limit');
+
 
 app.commandLine.appendSwitch('disable-gpu-vsync');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
@@ -103,10 +104,6 @@ function createWindow() {
         event.preventDefault();
         win.loadURL(url);
     });
-
-    if (config.get('enablePointerLockOptions', false))
-        app.commandLine.appendSwitch('enable-pointer-lock-options');
-
 
     const contents = win.webContents;
 
