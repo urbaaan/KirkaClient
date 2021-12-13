@@ -2,7 +2,7 @@ const { gameLoaded, version } = require('./const');
 const DiscordRPC = require('discord-rpc');
 const ClientID = '871730144836976650';
 const starttime = Date.now();
-const { badge_checker } = require('./badges');
+const { checkBadge } = require('./badges');
 const Store = require('electron-store');
 const config = new Store();
 
@@ -32,8 +32,9 @@ function initRPC(socket, webContents) {
 
             if (user.slice(-1) === ' ') user = user.slice(0, -1);
             if (user !== '') {
-                userBadges = badge_checker(user);
-                userBadges = userBadges[0];
+                userBadges = checkBadge(user);
+                if (!userBadges)
+                    userBadges = { type: 'anything', role: 'KirkaClient User' };
                 const gameURL = webContents.getURL();
                 if (!gameLoaded(gameURL))
                     notPlaying();

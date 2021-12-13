@@ -37,17 +37,25 @@ module.exports = [
     {
         name: 'Client Badges',
         id: 'clientBadges',
-        category: 'Performance',
+        category: 'Badges',
         type: 'checkbox',
         needsRestart: true,
         val: config.get('clientBadges', true),
+    },
+    {
+        name: 'Preferred Badge',
+        id: 'prefBadge',
+        category: 'Badges',
+        type: 'list',
+        values: ['None', 'Developer', 'Contributor', 'Staff', 'Patreon', 'GFX Artist', 'V.I.P', 'Kirka Dev', 'Custom Badge'],
+        needsRestart: true,
+        val: config.get('prefBadge', 'None')
     },
     {
         name: 'Show FPS',
         id: 'showFPS',
         category: 'Game',
         type: 'checkbox',
-        needsRestart: false,
         val: config.get('showFPS', true),
     },
     {
@@ -64,7 +72,6 @@ module.exports = [
         id: 'customScope',
         category: 'Game',
         type: 'input',
-        needsRestart: false,
         val: config.get('customScope', ''),
         placeholder: 'Scope url'
     },
@@ -73,7 +80,6 @@ module.exports = [
         id: 'scopeSize',
         category: 'Game',
         type: 'slider',
-        needsRestart: false,
         min: 10,
         max: 1000,
         val: config.get('scopeSize', 400)
@@ -129,7 +135,6 @@ module.exports = [
         category: 'Twitch',
         type: 'input',
         placeholder: 'Command to get the link of your game',
-        needsRestart: false,
         val: config.get('linkCommand', '!link')
     },
     {
@@ -138,7 +143,6 @@ module.exports = [
         category: 'Twitch',
         type: 'input',
         placeholder: '{link} = Gamelink. Client will auto-replace that.',
-        needsRestart: false,
         val: config.get('linkMessage', 'Join here: {link}')
     },
     {
@@ -147,7 +151,6 @@ module.exports = [
         category: 'Updates',
         type: 'list',
         values: ['Ask for download', 'Auto download'],
-        needsRestart: false,
         val: config.get('updateType', 'Auto download')
     },
     {
