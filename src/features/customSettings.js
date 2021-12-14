@@ -59,6 +59,13 @@ module.exports = [
         val: config.get('showFPS', true),
     },
     {
+        name: 'Prevent Ctrl+W from closing client',
+        id: 'controlW',
+        category: 'Game',
+        type: 'checkbox',
+        val: config.get('controlW', true),
+    },
+    {
         name: 'In-game Chat Mode',
         id: 'chatType',
         category: 'Game',

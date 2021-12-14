@@ -21,6 +21,7 @@ let win;
 let splash;
 let setwin;
 let canDestroy = false;
+let CtrlW = false;
 let updateContent;
 
 socket.on('connect', () => {
@@ -96,7 +97,12 @@ function createWindow() {
 
     win.loadURL('https://kirka.io/');
 
-    win.on('close', function() {
+    win.on('close', function(e) {
+        if (CtrlW) {
+            e.preventDefault();
+            CtrlW = false;
+            return;
+        }
         app.exit();
     });
 
@@ -162,6 +168,8 @@ function createShortcutKeys() {
     electronLocalshortcut.register(win, 'F6', () => checkkirka());
     electronLocalshortcut.register(win, 'F11', () => win.setSimpleFullScreen(!win.isSimpleFullScreen()));
     electronLocalshortcut.register(win, 'Enter', () => chatShowHide());
+    if (config.get('controlW', true))
+        electronLocalshortcut.register(win, 'Control+W', () => { CtrlW = true; });
 }
 
 let chatState = false;
