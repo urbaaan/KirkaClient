@@ -7,3 +7,4 @@ resources/
 dist/
 *.asar
 version.*
+yarn-error.log

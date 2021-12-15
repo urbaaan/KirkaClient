@@ -13,9 +13,9 @@ const fs = require('fs');
 const easylist = fs.readFileSync(path.join(__dirname, 'easylist.txt'), 'utf-8');
 const blocker = ElectronBlocker.parse(easylist);
 
-const gamePreload = path.resolve(__dirname + '/preload/global.js');
-const splashPreload = path.resolve(__dirname + '/preload/splash.js');
-const settingsPreload = path.resolve(__dirname + '/preload/settings.js');
+const gamePreload = path.join(__dirname, 'preload', 'global.js');
+const splashPreload = path.join(__dirname, 'preload', 'splash.js');
+const settingsPreload = path.join(__dirname, 'preload', 'settings.js');
 
 let win;
 let splash;
@@ -23,6 +23,7 @@ let setwin;
 let canDestroy = false;
 let CtrlW = false;
 let updateContent;
+let errTries = 0;
 
 socket.on('connect', () => {
     console.log('WebSocket Connected!');
@@ -206,9 +207,9 @@ app.allowRendererProcessReuse = true;
 let icon;
 
 if (process.platform === 'linux')
-    icon = __dirname + '/media/icon.png';
+    icon = path.join(__dirname, 'media', 'icon.png');
 else
-    icon = __dirname + '/media/icon.ico';
+    icon = path.join(__dirname, 'media', 'icon.ico');
 
 app.whenReady().then(() => createSplashWindow());
 
@@ -231,7 +232,7 @@ function createSplashWindow() {
         show: true,
         icon: icon,
         transparent: true,
-        alwaysOnTop: false,
+        alwaysOnTop: true,
         webPreferences: {
             preload: splashPreload,
             nodeIntegration: true,
@@ -246,8 +247,15 @@ function createSplashWindow() {
 async function initAutoUpdater(webContents) {
     if (updateContent === undefined) {
         setTimeout(() => {
+            errTries = errTries + 1;
+            if (errTries >= 20) {
+                dialog.showErrorBox('Websocket Error', 'Client is experiencing issues connecting to the WebSocket. ' +
+                'Please report this issue to the support server ASAP!');
+                app.quit();
+                return;
+            }
             initAutoUpdater(webContents);
-        }, 100);
+        }, 500);
         return;
     }
 

@@ -11,7 +11,8 @@ let table;
 
 window.addEventListener('DOMContentLoaded', () => {
     const check = document.getElementsByClassName('about-wrapper');
-    if (check.length > 0) return;
+    if (check.length > 0)
+        return;
     table = document.getElementsByTagName('table')[0];
     makeSettings();
 });

@@ -163,12 +163,15 @@ function doOnLoad() {
     }
 
 
-    if (state != 'game') return;
-    if (config.get('showFPS', true)) refreshLoop();
+    if (state != 'game')
+        return;
+    if (config.get('showFPS', true))
+        refreshLoop();
 
     setInterval(() => {
         const ele = document.querySelector('#app > div.interface.text-2 > div.team-section > div.player > div > div.head-right > div.nickname');
-        if (ele === null) return;
+        if (ele === null)
+            return;
         config.set('user', ele.innerText);
     }, 3500);
 
@@ -221,6 +224,7 @@ function showNotification() {
 function createBalloon(text, error = false) {
     let border = '';
     let style = '';
+
     if (error) {
         border = '<i class="fas fa-times-circle" style="color: #ff355b;"></i>';
         style = 'border-left: 8px solid #ff355b;';
@@ -358,35 +362,24 @@ async function configMR() {
         videoBitsPerSecond: 3000000,
         mimeType: 'video/webm; codecs=vp9'
     };
-    return new Promise((resolve, reject) => {
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(stream => {
-                mediaRecorder = new MediaRecorder(stream, options);
-                console.log('mR', mediaRecorder);
-                mediaRecorder.ondataavailable = handleDataAvailable;
-                mediaRecorder.onstop = handleStop;
-                mediaRecorder.onstart = () => {
-                    console.log('started recording');
-                    recording = true;
-                };
-                mediaRecorder.onpause = () => { paused = true; };
-                mediaRecorder.onresume = () => { paused = false; };
-                resolve(mediaRecorder);
-            })
-            .catch(err => {
-                console.error('getUserMedia failed with error: ', err);
-                reject(err);
-            });
-    });
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    mediaRecorder = new MediaRecorder(stream, options);
+    console.log('mR', mediaRecorder);
+    mediaRecorder.ondataavailable = (e) => { recordedChunks.push(e.data); };
+    mediaRecorder.onstop = handleStop;
+    mediaRecorder.onstart = () => {
+        console.log('started recording');
+        recording = true;
+    };
+    mediaRecorder.onpause = () => { paused = true; };
+    mediaRecorder.onresume = () => { paused = false; };
+    return mediaRecorder;
 }
 
-function handleDataAvailable(e) {
-    recordedChunks.push(e.data);
-}
-
-async function handleStop(e) {
+async function handleStop() {
     recording = false;
-    if (starttime === undefined) return;
+    if (starttime === undefined)
+        return;
     const blob = new Blob(recordedChunks, {
         type: 'video/mp4;'
     });
@@ -394,18 +387,17 @@ async function handleStop(e) {
     fixwebm(blob, Date.now() - starttime - totalPause, saveRecording);
 }
 
-function startRecording() {
+async function startRecording() {
     if (mediaRecorder === null) {
         console.log('First Time: Configuring mR');
-        configMR()
-            .then((rs) => {
-                console.log('Configurated!', rs);
-                mediaRecorder = rs;
-                startrec();
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+        try {
+            const mR = await configMR();
+            console.log('Configurated!', mR);
+            mediaRecorder = mR;
+            startrec();
+        } catch (err) {
+            console.error(err);
+        }
     } else if (recording) {
         if (paused)
             resumeRecording();
@@ -445,18 +437,20 @@ function stopRecording(save) {
         createBalloon('No recording in progress!', true);
         return;
     }
-    if (mediaRecorder === undefined || mediaRecorder === null) return;
+    if (mediaRecorder === undefined || mediaRecorder === null)
+        return;
+
     if (save) {
         const folderPath = path.join(logDir, 'videos');
         console.log(folderPath);
-        if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath);
-        filepath = path.join(folderPath, `kirka-${Date.now()}.mp4`);
+        if (!fs.existsSync(folderPath))
+            fs.mkdirSync(folderPath);
+        filepath = path.join(folderPath, `kirkaclient-${new Date(Date.now()).toDateString()}.mp4`);
     }
     shouldSave = save;
     try {
         if (paused)
             mediaRecorder.resume();
-
         mediaRecorder.stop();
     } catch (e) {
         console.error(e);
@@ -495,6 +489,8 @@ function saveRecording(blob) {
                 console.log('Saved!');
             });
         }
+    }).catch(err => {
+        console.log(err);
     });
 }
 

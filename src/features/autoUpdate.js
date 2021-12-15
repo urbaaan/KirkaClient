@@ -58,11 +58,11 @@ async function downloadUpdate(contents, updateData) {
                     process.noAsar = true;
                     try {
                         fs.writeFileSync(downloadDestination, a, 'binary');
-                        resolve('download complete');
+                        resolve();
                     } catch (e) {
                         dialog.showErrorBox('Permission Error!',
                             'Please start client as Administrator.\nThis can be done by Right Click > Run as Administrator.');
-                        reject('EPERM');
+                        reject();
                     }
                 });
             });
