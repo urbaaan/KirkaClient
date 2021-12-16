@@ -168,6 +168,9 @@ function doOnLoad() {
     if (config.get('showFPS', true))
         refreshLoop();
 
+    if (config.get('showHP', true))
+        observeHp();
+
     setInterval(() => {
         const ele = document.querySelector('#app > div.interface.text-2 > div.team-section > div.player > div > div.head-right > div.nickname');
         if (ele === null)
@@ -193,6 +196,19 @@ function doOnLoad() {
 
 function resetVars() {
     FPSdiv = null;
+}
+
+function observeHp() {
+    const hpNode = document.querySelector('#app > div.game-interface > div.desktop-game-interface > div.state > div.hp > div.cont-hp > div');
+    if (!hpNode) {
+        setTimeout(observeHp, 100);
+        return;
+    }
+    hpObserver.observe(hpNode, {
+        attributes: true,
+        attributeFilter: ['style']
+    });
+    document.querySelector('#app > div.game-interface > div.desktop-game-interface > div.state > div.hp > div.hp-title.text-1').innerText = '100';
 }
 
 ipcRenderer.on('chat', (event, state, force) => {
@@ -335,6 +351,13 @@ window.addEventListener('load', () => {
             nickname.insertAdjacentHTML('beforeend', `<img data-v-e6e1daf8 clientbadge src="${badge.url}" height=20 title=${badge.role}>`);
         }
     }, 750);
+});
+
+const hpObserver = new MutationObserver((data, observer) => {
+    data.forEach(ele => {
+        const width = parseInt(ele.target.style.width.replace('%', ''));
+        document.querySelector('#app > div.game-interface > div.desktop-game-interface > div.state > div.hp > div.hp-title.text-1').innerText = width;
+    });
 });
 
 async function configMR() {

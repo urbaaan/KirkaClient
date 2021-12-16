@@ -59,6 +59,13 @@ module.exports = [
         val: config.get('showFPS', true),
     },
     {
+        name: 'Show HP',
+        id: 'showHP',
+        category: 'Game',
+        type: 'checkbox',
+        val: config.get('showHP', true),
+    },
+    {
         name: 'Prevent Ctrl+W from closing client',
         id: 'controlW',
         category: 'Game',

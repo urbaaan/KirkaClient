@@ -232,7 +232,6 @@ function createSplashWindow() {
         show: true,
         icon: icon,
         transparent: true,
-        alwaysOnTop: true,
         webPreferences: {
             preload: splashPreload,
             nodeIntegration: true,
