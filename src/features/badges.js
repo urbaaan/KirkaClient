@@ -24,7 +24,8 @@ function getBadge(type, user = null) {
         'gfx': 'https://media.discordapp.net/attachments/863805591008706607/874611068570333234/gfx.PNG',
         'con': 'https://media.discordapp.net/attachments/863805591008706607/874611066909380618/dev.png',
         'kdev': 'https://media.discordapp.net/attachments/874979720683470859/888703118118907924/kirkadev.PNG',
-        'vip': 'https://media.discordapp.net/attachments/874979720683470859/888703150628941834/vip.PNG'
+        'vip': 'https://media.discordapp.net/attachments/874979720683470859/888703150628941834/vip.PNG',
+        'nitro': 'https://media.discordapp.net/attachments/874979720683470859/921387669743861821/nitro.png'
     };
     if (type == 'custom') {
         const customBadges = badgesData.custom;
@@ -60,6 +61,7 @@ function checkBadge(user) {
         'GFX Artist': 'gfx',
         'V.I.P': 'vip',
         'Kirka Dev': 'kdev',
+        'Server Booster': 'nitro',
         'Custom Badge': 'custom'
     };
     let searchBadge = null;

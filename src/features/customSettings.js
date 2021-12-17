@@ -47,7 +47,7 @@ module.exports = [
         id: 'prefBadge',
         category: 'Badges',
         type: 'list',
-        values: ['None', 'Developer', 'Contributor', 'Staff', 'Patreon', 'GFX Artist', 'V.I.P', 'Kirka Dev', 'Custom Badge'],
+        values: ['None', 'Developer', 'Contributor', 'Staff', 'Patreon', 'GFX Artist', 'V.I.P', 'Kirka Dev', 'Server Booster', 'Custom Badge'],
         needsRestart: true,
         val: config.get('prefBadge', 'None')
     },
