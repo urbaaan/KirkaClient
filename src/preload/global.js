@@ -517,10 +517,14 @@ function saveRecording(blob) {
     });
 }
 
-function genChatMsg(text) {
-    console.log(text);
+ipcRenderer.on('twitch-msg', (event, userName, userColor, msg) => {
+    genChatMsg(msg, userName, userColor);
+});
+
+function genChatMsg(text, sender = '[KirkaClient]', style = null) {
     const chatHolder = document.getElementsByClassName('messages messages-cont')[0];
-    if (chatHolder === undefined) return;
+    if (chatHolder === undefined)
+        return;
 
     const chatItem = document.createElement('div');
     const chatUser = document.createElement('span');
@@ -530,7 +534,9 @@ function genChatMsg(text) {
     chatMsg.className = 'chatMsg_client';
     chatMsg.innerText = text;
     chatUser.className = 'name';
-    chatUser.innerText = '[KirkaClient]';
+    chatUser.innerText = `${sender}: `;
+    if (style)
+        chatUser.style.color = style;
 
     chatItem.appendChild(chatUser);
     chatItem.appendChild(chatMsg);

@@ -22,7 +22,7 @@ function startTwitch(web) {
             ]
         };
         client = new tmi.client(opts);
-        client.on('message', onMessageHandler);
+        client.on('chat', onMessageHandler);
         client.on('connected', onConnectedHandler);
         webContents = web;
         client.connect().catch((err) => console.log(err));
@@ -35,9 +35,13 @@ function closeTwitch() {
         client.disconnect();
 }
 
-function onMessageHandler(target, context, msg, self) {
-    if (self) return;
+function onMessageHandler(channel, user, msg) {
     msg = msg.toLowerCase();
+    if (config.get('twitchChatSwap', false)) {
+        const userName = user['display-name'];
+        const userColor = user['color'] || '#ff69b4';
+        webContents.send('twitch-msg', userName, userColor, msg);
+    }
 
     const commandName = msg.trim();
     let response;
@@ -48,7 +52,7 @@ function onMessageHandler(target, context, msg, self) {
     else
         return;
 
-    client.say(target, response);
+    client.say(channel, response);
 }
 
 function onConnectedHandler(addr, port) {

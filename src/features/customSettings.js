@@ -116,6 +116,14 @@ module.exports = [
         val: config.get('twitchInt', false),
     },
     {
+        name: 'Show Twitch chat in Kirka chat',
+        id: 'twitchChatSwap',
+        category: 'Twitch',
+        type: 'checkbox',
+        needsRestart: true,
+        val: config.get('twitchChatSwap', false),
+    },
+    {
         name: 'Bot Username',
         id: 'botUsername',
         category: 'Twitch',
