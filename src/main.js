@@ -80,10 +80,8 @@ function createWindow() {
     win = new BrowserWindow({
         width: 1280,
         height: 720,
-        frame: false,
         backgroundColor: '#000000',
         titleBarStyle: 'hidden',
-
         show: false,
         acceptFirstMouse: true,
         icon: icon,
@@ -94,6 +92,7 @@ function createWindow() {
             contextIsolation: false
         },
     });
+    win.removeMenu();
     createShortcutKeys();
 
     win.loadURL('https://kirka.io/');
