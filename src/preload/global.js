@@ -541,8 +541,7 @@ function genChatMsg(text, sender = '[KirkaClient]', style = null) {
     chatItem.appendChild(chatUser);
     chatItem.appendChild(chatMsg);
     chatHolder.appendChild(chatItem);
-
-    console.log('generated message');
+    chatHolder.scrollTop = chatHolder.scrollHeight;
     return chatMsg;
 }
 
