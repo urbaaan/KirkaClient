@@ -24,9 +24,11 @@ let badgesData;
 let chatFocus = false;
 const chatState = true;
 const chatForce = true;
-const logDir = path.join(os.homedir(), '/Documents/KirkaClient');
 
-if (!fs.existsSync(logDir)) fs.promises.mkdir(logDir, { recursive: true });
+let logDir;
+ipcRenderer.on('logDir', (e, val) => {
+    logDir = val;
+});
 
 let oldState;
 window.addEventListener('DOMContentLoaded', (event) => {

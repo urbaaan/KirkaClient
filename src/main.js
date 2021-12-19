@@ -86,10 +86,10 @@ function createWindow() {
         acceptFirstMouse: true,
         icon: icon,
         webPreferences: {
-            nodeIntergation: true,
             preload: gamePreload,
             enableRemoteModule: true,
-            contextIsolation: false
+            contextIsolation: false,
+            nodeIntegration: true
         },
     });
     win.removeMenu();
@@ -119,6 +119,7 @@ function createWindow() {
         initRPC(socket, contents);
         initBadges(socket);
         startTwitch(contents);
+        ensureDirs();
         if (config.get('chatType', 'Show') !== 'Show')
             win.webContents.send('chat', false, true);
     });
@@ -136,6 +137,18 @@ function createWindow() {
         if (config.get('update', true))
             showChangeLogs();
     }
+}
+
+function ensureDirs() {
+    const documents = app.getPath('documents');
+    const appPath = path.join(documents, 'KirkaClient');
+    const recorderPath = path.join(appPath, 'videos');
+
+    if (!fs.existsSync(appPath))
+        fs.mkdirSync(appPath);
+    if (!fs.existsSync(recorderPath))
+        fs.mkdirSync(recorderPath);
+    win.webContents.send('logDir', appPath);
 }
 
 function showChangeLogs() {
@@ -166,7 +179,8 @@ function createShortcutKeys() {
     electronLocalshortcut.register(win, 'F5', () => contents.reload());
     electronLocalshortcut.register(win, 'Shift+F5', () => contents.reloadIgnoringCache());
     electronLocalshortcut.register(win, 'F6', () => checkkirka());
-    electronLocalshortcut.register(win, 'F11', () => win.setSimpleFullScreen(!win.isSimpleFullScreen()));
+    electronLocalshortcut.register(win, 'F11', () => win.setFullScreen(!win.isFullScreen()));
+    electronLocalshortcut.register(win, 'F12', () => win.webContents.openDevTools());
     electronLocalshortcut.register(win, 'Enter', () => chatShowHide());
     if (config.get('controlW', true))
         electronLocalshortcut.register(win, 'Control+W', () => { CtrlW = true; });

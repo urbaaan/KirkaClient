@@ -1,6 +1,6 @@
 const https = require('follow-redirects').https;
 const { version } = require('./const');
-const { dialog } = require('electron');
+const { dialog, app } = require('electron');
 const Store = require('electron-store');
 const config = new Store();
 const fs = require('fs');
@@ -62,7 +62,7 @@ async function downloadUpdate(contents, updateData) {
                     } catch (e) {
                         dialog.showErrorBox('Permission Error!',
                             'Please start client as Administrator.\nThis can be done by Right Click > Run as Administrator.');
-                        reject();
+                        app.quit();
                     }
                 });
             });
