@@ -7,7 +7,7 @@ const Store = require('electron-store');
 const config = new Store();
 
 let userBadges = { type: 'anything', role: 'KirkaClient User' };
-let matches;
+let socket;
 let discordOpen = false;
 
 DiscordRPC.register(ClientID);
@@ -22,14 +22,14 @@ client.on('ready', () => {
     discordOpen = true;
 });
 
-function initRPC(socket, webContents) {
+function initRPC(socket_, webContents) {
     if (!config.get('discordRPC', true))
         return;
+    socket = socket_;
     setInterval(() => {
         if (!discordOpen)
             return;
 
-        socket.send({ type: 3 });
         let user = config.get('user', '').toString();
 
         if (user.slice(-1) === ' ')
@@ -43,8 +43,10 @@ function initRPC(socket, webContents) {
             const gameURL = webContents.getURL();
             if (!gameLoaded(gameURL))
                 notPlaying();
-            else
-                updateRPC(gameURL);
+            else {
+                const gamecode = gameURL.replace('https://kirka.io/games/', '');
+                socket.send({ type: 3, data: gamecode });
+            }
         }
     }, 2500);
 }
@@ -64,59 +66,32 @@ function notPlaying() {
     });
 }
 
-function sendMatches(data) {
-    matches = data;
-}
-
-async function updateRPC(gameurl) {
-    let finalData;
-
-    const gamecode = gameurl.replace('https://kirka.io/games/', '');
-    const data = await getMatches(gamecode);
-    let category;
-
-    if (data.mode == 'Editor') {
+async function updateRPC(data) {
+    if (!discordOpen)
+        return;
+    console.log(data);
+    if (!data.success)
+        return;
+    let finalData, category;
+    if (data.shortMode == 'MAP') {
         finalData = {
-            mode: 'Editing a map'
+            mode: 'Editing a map',
+            cap: data.players
         };
         category = 'map';
     } else {
         finalData = {
-            'mode': data.mode,
-            'map': data.map_name,
-            'cap': data.cap,
-            'code': gamecode
+            mode: data.short,
+            map: data.map,
+            cap: data.players,
+            url: data.link
         };
         category = 'game';
     }
     updateClient(finalData, category);
 }
 
-async function getMatches(gamecode) {
-    let finaldata = null;
-    ['ffa', 'tdm', 'knife only', 'parkour'].forEach((mode) => {
-        const modeData = matches[mode];
-        for (const key in modeData) {
-            const value = modeData[key];
-            const roomId = value.roomId;
-            if (roomId == gamecode) {
-                finaldata = {
-                    map_name: value.metadata.mapName,
-                    cap: `${value.clients}/${value.maxClients}`,
-                    mode: mode.toUpperCase()
-                };
-                break;
-            }
-        }
-    });
-
-    return finaldata || { mode: 'Editor' };
-}
-
 function updateClient(data, type) {
-    if (data === undefined)
-        return;
-
     const updateData = {
         smallImageKey: userBadges.type,
         smallImageText: userBadges.role,
@@ -129,7 +104,7 @@ function updateClient(data, type) {
     switch (type) {
     case 'game':
         updateData['buttons'] = [
-            { label: 'Join Game', url: `https://kirka.io/games/${data.code}` },
+            { label: 'Join Game', url: data.url },
             { label: 'Get KirkaClient', url: 'https://discord.gg/bD9JNv6GFS' }
         ];
         updateData['details'] = `Playing ${data.mode}`;
@@ -140,6 +115,7 @@ function updateClient(data, type) {
             { label: 'Get KirkaClient', url: 'https://discord.gg/bD9JNv6GFS' }
         ];
         updateData['details'] = 'Editing a map';
+        updateData['state'] = data.cap;
         break;
     }
     client.setActivity(updateData);
@@ -152,4 +128,4 @@ function closeRPC() {
 
 module.exports.initRPC = initRPC;
 module.exports.closeRPC = closeRPC;
-module.exports.sendMatches = sendMatches;
+module.exports.updateRPC = updateRPC;

@@ -130,13 +130,16 @@ function doOnLoad() {
             return;
         }
         promo.appendChild(div);
+        return;
 
+        // eslint-disable-next-line no-unreachable
         const kirkaChat = document.getElementById('WMNn');
         kirkaChat.addEventListener('focusout', (event) => {
             chatFocus = false;
             // setChatState(chatState, chatForce);
         });
 
+        // eslint-disable-next-line no-unreachable
         kirkaChat.addEventListener('focusin', (event) => {
             chatFocus = true;
             // setChatState(chatState, chatForce);
@@ -146,6 +149,7 @@ function doOnLoad() {
     let settings = document.getElementById('clientSettings');
     switch (state) {
     case 'home':
+        setUsername();
         promo = document.getElementsByClassName('left-interface')[0];
         promo.appendChild(div);
         if (!settings) {
@@ -173,13 +177,6 @@ function doOnLoad() {
     if (config.get('showHP', true))
         observeHp();
 
-    setInterval(() => {
-        const ele = document.querySelector('#app > div.interface.text-2 > div.team-section > div.player > div > div.head-right > div.nickname');
-        if (ele === null)
-            return;
-        config.set('user', ele.innerText);
-    }, 3500);
-
     const url = config.get('customScope', '');
     if (url != '') {
         setInterval(function() {
@@ -194,6 +191,16 @@ function doOnLoad() {
             }
         }, 1000);
     }
+}
+
+function setUsername() {
+    const ele = document.querySelector('#app > div.interface.text-2 > div.team-section > div.player > div > div.head-right > div.nickname');
+    if (ele === null || ele.innerText == 'Newbie')
+        setTimeout(setUsername, 100);
+
+    const re = new RegExp(' ', 'g');
+    const user = ele.replace(re, '');
+    config.set('user', user);
 }
 
 function resetVars() {
@@ -611,7 +618,7 @@ function checkbadge(user) {
     };
 
     let searchBadge = null;
-    if (preferred != 'None')
+    if (preferred != 'None' && user != config.get('user'))
         searchBadge = badgeValues[preferred];
 
     if (searchBadge) {

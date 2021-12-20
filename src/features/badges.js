@@ -76,7 +76,6 @@ function checkBadge(user) {
         const allTypes = Object.keys(badgesData);
         for (let i = 0; i < allTypes.length; i++) {
             const badgeType = allTypes[i];
-            console.log(badgeType);
             if (badgesData[badgeType].includes(user))
                 allPossible.push(badgeType);
         }

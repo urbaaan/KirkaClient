@@ -4,7 +4,7 @@ const { app, BrowserWindow, clipboard, dialog, ipcMain } = require('electron');
 const electronLocalshortcut = require('electron-localshortcut');
 const Store = require('electron-store');
 const config = new Store();
-const { autoUpdate, sendBadges, sendMatches, startTwitch, initBadges, initRPC, closeTwitch, closeRPC } = require('./features');
+const { autoUpdate, sendBadges, updateRPC, startTwitch, initBadges, initRPC, closeTwitch, closeRPC } = require('./features');
 const { io } = require('socket.io-client');
 const socket = io('https://kirkaclient.herokuapp.com/');
 
@@ -41,7 +41,7 @@ socket.on('message', (data) => {
         socket.send({ type: 1, data: 'pong' });
         break;
     case 3:
-        sendMatches(data.data);
+        updateRPC(data.data);
         break;
     case 4:
         sendBadges(data.data);
