@@ -199,7 +199,7 @@ function setUsername() {
         setTimeout(setUsername, 100);
 
     const re = new RegExp(' ', 'g');
-    const user = ele.replace(re, '');
+    const user = ele.innerText.replace(re, '');
     config.set('user', user);
 }
 
