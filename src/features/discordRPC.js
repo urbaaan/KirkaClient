@@ -23,26 +23,30 @@ client.on('ready', () => {
 });
 
 function initRPC(socket, webContents) {
-    if (config.get('discordRPC', true)) {
-        setInterval(() => {
-            if (!discordOpen) return;
+    if (!config.get('discordRPC', true))
+        return;
+    setInterval(() => {
+        if (!discordOpen)
+            return;
 
-            socket.send({ type: 3 });
-            let user = config.get('user', '').toString();
+        socket.send({ type: 3 });
+        let user = config.get('user', '').toString();
 
-            if (user.slice(-1) === ' ') user = user.slice(0, -1);
-            if (user !== '') {
-                userBadges = checkBadge(user);
-                if (!userBadges)
-                    userBadges = { type: 'anything', role: 'KirkaClient User' };
-                const gameURL = webContents.getURL();
-                if (!gameLoaded(gameURL))
-                    notPlaying();
-                else
-                    updateRPC(gameURL);
-            }
-        }, 2500);
-    }
+        if (user.slice(-1) === ' ')
+            user = user.slice(0, -1);
+
+        if (user !== '') {
+            userBadges = checkBadge(user);
+            if (!userBadges)
+                userBadges = { type: 'anything', role: 'KirkaClient User' };
+
+            const gameURL = webContents.getURL();
+            if (!gameLoaded(gameURL))
+                notPlaying();
+            else
+                updateRPC(gameURL);
+        }
+    }, 2500);
 }
 
 function notPlaying() {
@@ -65,18 +69,19 @@ function sendMatches(data) {
 }
 
 async function updateRPC(gameurl) {
-    let final_data;
+    let finalData;
 
     const gamecode = gameurl.replace('https://kirka.io/games/', '');
     const data = await getMatches(gamecode);
     let category;
+
     if (data.mode == 'Editor') {
-        final_data = {
+        finalData = {
             mode: 'Editing a map'
         };
         category = 'map';
     } else {
-        final_data = {
+        finalData = {
             'mode': data.mode,
             'map': data.map_name,
             'cap': data.cap,
@@ -84,7 +89,7 @@ async function updateRPC(gameurl) {
         };
         category = 'game';
     }
-    updateClient(final_data, category);
+    updateClient(finalData, category);
 }
 
 async function getMatches(gamecode) {
@@ -109,7 +114,9 @@ async function getMatches(gamecode) {
 }
 
 function updateClient(data, type) {
-    if (data === undefined) return;
+    if (data === undefined)
+        return;
+
     const updateData = {
         smallImageKey: userBadges.type,
         smallImageText: userBadges.role,
@@ -118,6 +125,7 @@ function updateClient(data, type) {
         instance: true,
         startTimestamp: starttime,
     };
+
     switch (type) {
     case 'game':
         updateData['buttons'] = [

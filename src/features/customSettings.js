@@ -47,7 +47,7 @@ module.exports = [
         id: 'prefBadge',
         category: 'Badges',
         type: 'list',
-        values: ['None', 'Developer', 'Contributor', 'Staff', 'Patreon', 'GFX Artist', 'V.I.P', 'Kirka Dev', 'Custom Badge'],
+        values: ['None', 'Developer', 'Contributor', 'Staff', 'Patreon', 'GFX Artist', 'V.I.P', 'Kirka Dev', 'Server Booster', 'Custom Badge'],
         needsRestart: true,
         val: config.get('prefBadge', 'None')
     },
@@ -57,6 +57,13 @@ module.exports = [
         category: 'Game',
         type: 'checkbox',
         val: config.get('showFPS', true),
+    },
+    {
+        name: 'Show HP',
+        id: 'showHP',
+        category: 'Game',
+        type: 'checkbox',
+        val: config.get('showHP', true),
     },
     {
         name: 'Prevent Ctrl+W from closing client',
@@ -107,6 +114,14 @@ module.exports = [
         type: 'checkbox',
         needsRestart: true,
         val: config.get('twitchInt', false),
+    },
+    {
+        name: 'Show Twitch chat in Kirka chat',
+        id: 'twitchChatSwap',
+        category: 'Twitch',
+        type: 'checkbox',
+        needsRestart: true,
+        val: config.get('twitchChatSwap', false),
     },
     {
         name: 'Bot Username',

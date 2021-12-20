@@ -14,7 +14,8 @@ const tips = [
     'A streamer? Make sure to check out Twitch Integration!',
     'Press F7 to hop into any game!',
     'Make sure to check out our Auto-Joiner in settings!',
-    'We now support Windows 32-bit OS!'
+    'We now support Windows 32-bit OS!',
+    'Merry Christmas!',
 ];
 
 window.addEventListener('DOMContentLoaded', () => {

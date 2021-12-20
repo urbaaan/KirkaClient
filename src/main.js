@@ -13,9 +13,9 @@ const fs = require('fs');
 const easylist = fs.readFileSync(path.join(__dirname, 'easylist.txt'), 'utf-8');
 const blocker = ElectronBlocker.parse(easylist);
 
-const gamePreload = path.resolve(__dirname + '/preload/global.js');
-const splashPreload = path.resolve(__dirname + '/preload/splash.js');
-const settingsPreload = path.resolve(__dirname + '/preload/settings.js');
+const gamePreload = path.join(__dirname, 'preload', 'global.js');
+const splashPreload = path.join(__dirname, 'preload', 'splash.js');
+const settingsPreload = path.join(__dirname, 'preload', 'settings.js');
 
 let win;
 let splash;
@@ -23,6 +23,7 @@ let setwin;
 let canDestroy = false;
 let CtrlW = false;
 let updateContent;
+let errTries = 0;
 
 socket.on('connect', () => {
     console.log('WebSocket Connected!');
@@ -79,20 +80,19 @@ function createWindow() {
     win = new BrowserWindow({
         width: 1280,
         height: 720,
-        frame: false,
         backgroundColor: '#000000',
         titleBarStyle: 'hidden',
-
         show: false,
         acceptFirstMouse: true,
         icon: icon,
         webPreferences: {
-            nodeIntergation: true,
             preload: gamePreload,
             enableRemoteModule: true,
-            contextIsolation: false
+            contextIsolation: false,
+            nodeIntegration: true
         },
     });
+    win.removeMenu();
     createShortcutKeys();
 
     win.loadURL('https://kirka.io/');
@@ -119,6 +119,7 @@ function createWindow() {
         initRPC(socket, contents);
         initBadges(socket);
         startTwitch(contents);
+        ensureDirs();
         if (config.get('chatType', 'Show') !== 'Show')
             win.webContents.send('chat', false, true);
     });
@@ -136,6 +137,18 @@ function createWindow() {
         if (config.get('update', true))
             showChangeLogs();
     }
+}
+
+function ensureDirs() {
+    const documents = app.getPath('documents');
+    const appPath = path.join(documents, 'KirkaClient');
+    const recorderPath = path.join(appPath, 'videos');
+
+    if (!fs.existsSync(appPath))
+        fs.mkdirSync(appPath);
+    if (!fs.existsSync(recorderPath))
+        fs.mkdirSync(recorderPath);
+    win.webContents.send('logDir', appPath);
 }
 
 function showChangeLogs() {
@@ -166,7 +179,8 @@ function createShortcutKeys() {
     electronLocalshortcut.register(win, 'F5', () => contents.reload());
     electronLocalshortcut.register(win, 'Shift+F5', () => contents.reloadIgnoringCache());
     electronLocalshortcut.register(win, 'F6', () => checkkirka());
-    electronLocalshortcut.register(win, 'F11', () => win.setSimpleFullScreen(!win.isSimpleFullScreen()));
+    electronLocalshortcut.register(win, 'F11', () => win.setFullScreen(!win.isFullScreen()));
+    electronLocalshortcut.register(win, 'F12', () => win.webContents.openDevTools());
     electronLocalshortcut.register(win, 'Enter', () => chatShowHide());
     if (config.get('controlW', true))
         electronLocalshortcut.register(win, 'Control+W', () => { CtrlW = true; });
@@ -206,9 +220,9 @@ app.allowRendererProcessReuse = true;
 let icon;
 
 if (process.platform === 'linux')
-    icon = __dirname + '/media/icon.png';
+    icon = path.join(__dirname, 'media', 'icon.png');
 else
-    icon = __dirname + '/media/icon.ico';
+    icon = path.join(__dirname, 'media', 'icon.ico');
 
 app.whenReady().then(() => createSplashWindow());
 
@@ -231,7 +245,6 @@ function createSplashWindow() {
         show: true,
         icon: icon,
         transparent: true,
-        alwaysOnTop: false,
         webPreferences: {
             preload: splashPreload,
             nodeIntegration: true,
@@ -246,8 +259,15 @@ function createSplashWindow() {
 async function initAutoUpdater(webContents) {
     if (updateContent === undefined) {
         setTimeout(() => {
+            errTries = errTries + 1;
+            if (errTries >= 20) {
+                dialog.showErrorBox('Websocket Error', 'Client is experiencing issues connecting to the WebSocket. ' +
+                'Please report this issue to the support server ASAP!');
+                app.quit();
+                return;
+            }
             initAutoUpdater(webContents);
-        }, 100);
+        }, 500);
         return;
     }
 
