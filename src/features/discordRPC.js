@@ -69,7 +69,7 @@ function notPlaying() {
 async function updateRPC(data) {
     if (!discordOpen)
         return;
-    console.log(data);
+
     if (!data.success)
         return;
     let finalData, category;
