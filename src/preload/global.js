@@ -22,6 +22,7 @@ let recording = false;
 let paused = false;
 let badgesData;
 let chatFocus = false;
+let settings;
 const chatState = true;
 const chatForce = true;
 
@@ -146,15 +147,15 @@ function doOnLoad() {
         });
     }
 
-    let settings = document.getElementById('clientSettings');
     switch (state) {
     case 'home':
+        settings = document.getElementById('clientSettings');
         setUsername();
         promo = document.getElementsByClassName('left-interface')[0];
         promo.appendChild(div);
-        if (!settings) {
-            const canvas = document.getElementById('left-icons');
-            if (!canvas) return;
+        // eslint-disable-next-line no-case-declarations
+        const canvas = document.getElementById('left-icons');
+        if (canvas) {
             canvas.insertAdjacentHTML('beforeend', '<div data-v-6be9607e="" id="clientSettings" class="icon-btn text-1" style="--i:3;" data-v-45658db6=""><div data-v-45658db6="" class="wrapper"><img data-v-b8de1e14="" data-v-4f66c13e="" src="https://media.discordapp.net/attachments/912303941449039932/913787350738407434/client_icon.png" width="90%" height="auto"><div data-v-4f66c13e="" class="text-icon">CLIENT</div></div></div>');
             settings = document.getElementById('clientSettings');
             settings.onclick = () => {
@@ -166,6 +167,19 @@ function doOnLoad() {
     case 'game':
         setPromo();
         break;
+    }
+
+    function addSettingsButton() { // WIP
+        const canvas = document.querySelector('#app > div.game-interface > div.esc-interface > div.right-container > div.head > div.head-right');
+        console.log(canvas);
+        if (canvas) {
+            canvas.insertAdjacentHTML('afterbegin', '<button data-v-02c36fca="" data-v-b427fee8="" id="clientSettings" class="button right-btn rectangle" style="background-color: var(--secondary-5); --hover-color:#5C688F; --top:#5C688F; --bottom:#252E4B; width: "5vw";><div data-v-02c36fca="" class="triangle"></div><div data-v-02c36fca="" class="text"><img data-v-b8de1e14="" data-v-b427fee8="" src="https://media.discordapp.net/attachments/912303941449039932/913787350738407434/client_icon.png" width="100%" height="auto"></div><div data-v-02c36fca="" class="borders"><div data-v-02c36fca="" class="border-top border"></div><div data-v-02c36fca="" class="border-bottom border"></div></div></button>');
+            settings = document.getElementById('clientSettings');
+            settings.onclick = () => {
+                ipcRenderer.send('show-settings');
+            };
+        } else
+            setTimeout(addSettingsButton, 500);
     }
 
 
@@ -195,8 +209,10 @@ function doOnLoad() {
 
 function setUsername() {
     const ele = document.querySelector('#app > div.interface.text-2 > div.team-section > div.player > div > div.head-right > div.nickname');
-    if (ele === null || ele.innerText == 'Newbie')
+    if (ele === null || ele.innerText == 'Newbie') {
         setTimeout(setUsername, 100);
+        return;
+    }
 
     const re = new RegExp(' ', 'g');
     const user = ele.innerText.replace(re, '');
@@ -205,6 +221,7 @@ function setUsername() {
 
 function resetVars() {
     FPSdiv = null;
+    settings = null;
 }
 
 function observeHp() {

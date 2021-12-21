@@ -81,7 +81,7 @@ async function updateRPC(data) {
         category = 'map';
     } else {
         finalData = {
-            mode: data.short,
+            mode: data.shortMode,
             map: data.map,
             cap: data.players,
             url: data.link

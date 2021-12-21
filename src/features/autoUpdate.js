@@ -43,7 +43,7 @@ async function downloadUpdate(contents, updateData) {
     let myreq;
 
     async function downloadFile() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             myreq = https.get(updateUrl, (res) => {
                 res.setEncoding('binary');
 

@@ -16,6 +16,7 @@ const blocker = ElectronBlocker.parse(easylist);
 const gamePreload = path.join(__dirname, 'preload', 'global.js');
 const splashPreload = path.join(__dirname, 'preload', 'splash.js');
 const settingsPreload = path.join(__dirname, 'preload', 'settings.js');
+const changeLogsPreload = path.join(__dirname, 'preload', 'changelogs.js');
 
 let win;
 let splash;
@@ -24,11 +25,16 @@ let canDestroy = false;
 let CtrlW = false;
 let updateContent;
 let errTries = 0;
+let changeLogs;
 
 socket.on('connect', () => {
     console.log('WebSocket Connected!');
+    const engine = socket.io.engine;
+    engine.once('upgrade', () => {
+        console.log(engine.transport.name);
+    });
     const channel = config.get('betaTester', false) ? 'beta' : 'stable';
-    socket.send({ type: 5, channel: channel });
+    socket.send({ type: 5, channel: channel, version: app.getVersion() });
 });
 
 socket.on('disconnect', () => {
@@ -49,7 +55,8 @@ socket.on('message', (data) => {
             win.webContents.send('badges', data.data);
         break;
     case 5:
-        updateContent = data.data;
+        updateContent = data.data.updates;
+        changeLogs = data.data.changelogs;
         break;
     }
 });
@@ -83,6 +90,7 @@ function createWindow() {
         backgroundColor: '#000000',
         titleBarStyle: 'hidden',
         show: false,
+        title: `KirkaClient v${app.getVersion()}`,
         acceptFirstMouse: true,
         icon: icon,
         webPreferences: {
@@ -152,23 +160,49 @@ function ensureDirs() {
 }
 
 function showChangeLogs() {
-    return;
-    // eslint-disable-next-line no-unreachable
     const changeLogsWin = new BrowserWindow({
-        width: 500,
-        height: 1200,
+        width: 700,
+        height: 700,
         center: true,
-        resizable: false,
-        frame: false,
-        show: true,
+        frame: true,
+        show: false,
         icon: icon,
+        title: 'KirkaClient ChangeLogs',
         transparent: true,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            preload: changeLogsPreload
         }
     });
-    // WIP
+    changeLogsWin.removeMenu();
+    // <button data-v-02c36fca="" data-v-b427fee8="" class="button right-btn rectangle" style="background-color: var(--secondary-5); --hover-color:#5C688F; --top:#5C688F; --bottom:#252E4B;"><div data-v-02c36fca="" class="triangle"></div><div data-v-02c36fca="" class="text"><svg data-v-b8de1e14="" data-v-b427fee8="" xmlns="http://www.w3.org/2000/svg" class="icon-settings svg-icon svg-icon--settings" data-v-02c36fca=""><!----><use data-v-b8de1e14="" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/img/icons.3c1a58be.svg#settings"></use></svg></div><div data-v-02c36fca="" class="borders"><div data-v-02c36fca="" class="border-top border"></div><div data-v-02c36fca="" class="border-bottom border"></div></div></button>
+
+    let html = '';
+    const versions = Object.keys(changeLogs);
+    for (let i = 0; i < versions.length; i++) {
+        const version = versions[i];
+        const data = changeLogs[version];
+        const changes = data.changes;
+        const releaseDate = data.releaseDate;
+        html += `<h5 class="mt-4"> <span class="p-2 bg-light shadow rounded text-success"> Version ${version}</span> - ${releaseDate}</h5>
+        <ul class="list-unstyled mt-3">`;
+        changes.forEach(line => {
+            html += `<li class="text-muted ml-3"><i class="mdi mdi-circle-medium mr-2"></i>${line}</li>`;
+        });
+        html += '</ul>';
+    }
+
+    changeLogsWin.loadFile(`${__dirname}/changelogs/index.html`);
+
+    changeLogsWin.on('ready-to-show', () => {
+        console.log('cl ready to show');
+        changeLogsWin.show();
+    });
+
+    ipcMain.on('get-html', () => {
+        changeLogsWin.webContents.send('html', html);
+    });
+    config.set('update', false);
 }
 
 function createShortcutKeys() {
@@ -244,6 +278,7 @@ function createSplashWindow() {
         frame: false,
         show: true,
         icon: icon,
+        title: 'Loading Client',
         transparent: true,
         webPreferences: {
             preload: splashPreload,
@@ -259,8 +294,9 @@ function createSplashWindow() {
 async function initAutoUpdater(webContents) {
     if (updateContent === undefined) {
         setTimeout(() => {
-            errTries = errTries + 1;
-            if (errTries >= 20) {
+            if (!socket.connected)
+                errTries = errTries + 1;
+            if (errTries >= 40) {
                 dialog.showErrorBox('Websocket Error', 'Client is experiencing issues connecting to the WebSocket. ' +
                 'Please report this issue to the support server ASAP!');
                 app.quit();
@@ -273,6 +309,7 @@ async function initAutoUpdater(webContents) {
 
     const didUpdate = await autoUpdate(webContents, updateContent);
     if (didUpdate) {
+        config.set('update', true);
         const options = {
             buttons: ['Ok'],
             message: 'Update Complete! Please relaunch the client.'
@@ -302,6 +339,7 @@ function createSettings() {
         show: false,
         frame: true,
         icon: icon,
+        title: 'KirkaClient Settings',
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
