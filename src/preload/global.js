@@ -23,6 +23,7 @@ let paused = false;
 let badgesData;
 let chatFocus = false;
 let settings;
+let escHidden = false;
 const chatState = true;
 const chatForce = true;
 
@@ -165,34 +166,23 @@ function doOnLoad() {
 
         break;
     case 'game':
+        addSettingsButton();
+        cloneButton();
         setPromo();
         break;
     }
 
-    function addSettingsButton() { // WIP
-        const canvas = document.querySelector('#app > div.game-interface > div.esc-interface > div.right-container > div.head > div.head-right');
-        console.log(canvas);
-        if (canvas) {
-            canvas.insertAdjacentHTML('afterbegin', '<button data-v-02c36fca="" data-v-b427fee8="" id="clientSettings" class="button right-btn rectangle" style="background-color: var(--secondary-5); --hover-color:#5C688F; --top:#5C688F; --bottom:#252E4B; width: "5vw";><div data-v-02c36fca="" class="triangle"></div><div data-v-02c36fca="" class="text"><img data-v-b8de1e14="" data-v-b427fee8="" src="https://media.discordapp.net/attachments/912303941449039932/913787350738407434/client_icon.png" width="100%" height="auto"></div><div data-v-02c36fca="" class="borders"><div data-v-02c36fca="" class="border-top border"></div><div data-v-02c36fca="" class="border-bottom border"></div></div></button>');
-            settings = document.getElementById('clientSettings');
-            settings.onclick = () => {
-                ipcRenderer.send('show-settings');
-            };
-        } else
-            setTimeout(addSettingsButton, 500);
-    }
-
-
     if (state != 'game')
         return;
+
     if (config.get('showFPS', true))
         refreshLoop();
 
     if (config.get('showHP', true))
         observeHp();
 
-    const url = config.get('customScope', '');
-    if (url != '') {
+    const url = config.get('customScope');
+    if (url) {
         setInterval(function() {
             const x = document.getElementsByClassName('sniper-mwNMW')[0];
             if (x) {
@@ -205,6 +195,37 @@ function doOnLoad() {
             }
         }, 1000);
     }
+}
+
+function addSettingsButton() {
+    const canvas = document.querySelector('#app > div.game-interface > div.esc-interface > div.right-container > div.head > div.head-right');
+    if (canvas) {
+        canvas.insertAdjacentHTML('afterbegin', '<button data-v-02c36fca="" data-v-b427fee8="" class="button right-btn rectangle" style="background-color: var(--secondary-5); --hover-color:#5C688F; --top:#5C688F; --bottom:#252E4B; width: 5vw;; padding: 0px; margin: 0px;"><div data-v-02c36fca="" class="triangle"></div><div data-v-02c36fca="" class="text"><img data-v-b8de1e14="" data-v-b427fee8="" src="https://media.discordapp.net/attachments/912303941449039932/913787350738407434/client_icon.png" width="100%" height="auto"></div><div data-v-02c36fca="" class="borders"><div data-v-02c36fca="" class="border-top border"></div><div data-v-02c36fca="" class="border-bottom border"></div></div></button>');
+        settings = document.querySelector('#app > div.game-interface > div.esc-interface > div.right-container > div.head > div.head-right > button:nth-child(1)');
+        console.log(settings);
+        settings.addEventListener('click', () => {
+            ipcRenderer.send('show-settings');
+        });
+    } else
+        setTimeout(addSettingsButton, 500);
+}
+
+function cloneButton() {
+    const continueButton = document.querySelector('#app > div.game-interface > div.esc-interface > div.right-container > div.cont-continue > button');
+    if (!continueButton) {
+        setTimeout(cloneButton, 100);
+        return;
+    }
+    const newButton = continueButton.cloneNode(true);
+    continueButton.parentNode.replaceChild(newButton, continueButton);
+    newButton.onclick = () => {
+        try {
+            document.querySelector('#app > div.game-interface > div.esc-interface').style = 'display: none;';
+        } catch (err) {
+            console.log(err);
+        }
+        escHidden = true;
+    };
 }
 
 function setUsername() {
@@ -310,6 +331,11 @@ window.addEventListener('keydown', function(event) {
             }, 0);
         });
         break;
+    case 'Escape':
+        if (escHidden) {
+            document.querySelector('#app > div.game-interface > div.esc-interface').style = 'display: flex;';
+            escHidden = false;
+        }
     }
 });
 
