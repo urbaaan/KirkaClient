@@ -128,8 +128,15 @@ function createWindow() {
         initBadges(socket);
         startTwitch(contents);
         ensureDirs();
-        if (config.get('chatType', 'Show') !== 'Show')
-            win.webContents.send('chat', false, true);
+        const chatState = config.get('chatType', 'Show');
+        switch (chatState) {
+        case 'Hide':
+            win.webContents.send('chat', false, true, false);
+            break;
+        case 'While Focussed':
+            win.webContents.send('chat', false, true, true);
+            break;
+        }
     });
 
     function showWin() {
@@ -215,32 +222,8 @@ function createShortcutKeys() {
     electronLocalshortcut.register(win, 'F6', () => checkkirka());
     electronLocalshortcut.register(win, 'F11', () => win.setFullScreen(!win.isFullScreen()));
     electronLocalshortcut.register(win, 'F12', () => win.webContents.openDevTools());
-    electronLocalshortcut.register(win, 'Enter', () => chatShowHide());
     if (config.get('controlW', true))
         electronLocalshortcut.register(win, 'Control+W', () => { CtrlW = true; });
-}
-
-let chatState = false;
-
-function chatShowHide() {
-    const chatType = config.get('chatType', 'Show');
-    return;
-    // eslint-disable-next-line no-unreachable
-    switch (chatType) {
-    case 'Show':
-        break;
-    case 'Hide':
-        win.webContents.send('chat', false, false);
-        break;
-    case 'On-Focus':
-        break;
-        win.webContents.send('chat', chatState, false);
-        if (chatState)
-            chatState = false;
-        else
-            chatState = true;
-
-    }
 }
 
 function checkkirka() {
@@ -353,7 +336,7 @@ function createSettings() {
 
     setwin.once('ready-to-show', () => {
         setwin.show();
-        // setwin.webContents.openDevTools();
+        setwin.webContents.openDevTools();
     });
 
     setwin.on('close', () => {

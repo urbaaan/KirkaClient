@@ -23,8 +23,10 @@ let paused = false;
 let badgesData;
 let chatFocus = false;
 let settings;
+let chatShowing;
 const chatState = true;
 const chatForce = true;
+let isChatFocus = false;
 
 let logDir;
 ipcRenderer.on('logDir', (e, val) => {
@@ -243,10 +245,12 @@ ipcRenderer.on('chat', (event, state, force) => {
     setChatState(state, force);
 });
 
-function setChatState(state, force) {
+function setChatState(state, force, isFocusActive) {
     const chat = document.getElementsByClassName('chat chat-position')[0];
+    isChatFocus = isFocusActive;
     if (chat === undefined) {
-        if (force) setTimeout(() => { setChatState(state, force); }, 1000);
+        if (force)
+            setTimeout(() => { setChatState(state, force); }, 1000);
         return;
     }
     if (state)
@@ -286,6 +290,19 @@ function createBalloon(text, error = false) {
     showNotification();
 }
 
+function toggleChat() {
+    const chat = document.getElementsByClassName('chat chat-position')[0];
+    if (chat.style == 'display: flex;') {
+        chat.blur();
+        setTimeout(() => {
+            chat.style = 'display: none;';
+        }, 100);
+    } else {
+        chat.state = 'display: flex;';
+        chat.focus();
+    }
+}
+
 window.addEventListener('keydown', function(event) {
     const autoJoinKey = config.get('AJ_keybind', 'F7');
     switch (event.key) {
@@ -314,7 +331,16 @@ window.addEventListener('keydown', function(event) {
         break;
     case 'Escape':
         addSettingsButton();
+        break;
+    case 'Enter':
+        if (isChatFocus)
+            toggleChat();
+        break;
     }
+});
+
+ipcRenderer.on('updateChat', () => {
+    console.log('updating chat');
 });
 
 const times = [];
@@ -348,10 +374,12 @@ function updateFPS(_fps) {
         FPSdiv.innerText = `FPS: ${_fps}`;
 }
 
-window.addEventListener('mouseup', (e) => {
-    if (e.button === 3 || e.button === 4)
-        e.preventDefault();
-});
+if (config.get('preventM4andM5', true)) {
+    window.addEventListener('mouseup', (e) => {
+        if (e.button === 3 || e.button === 4)
+            e.preventDefault();
+    });
+}
 
 window.addEventListener('load', () => {
     setInterval(() => {

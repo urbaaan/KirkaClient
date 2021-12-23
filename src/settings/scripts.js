@@ -2,18 +2,27 @@
 const Store = require('electron-store');
 const config = new Store();
 
-function checkbox(customID) {
+function checkbox(option) {
+    const customID = option.id;
     const val = document.getElementById(customID).checked;
     config.set(customID, val);
+    if (option.run)
+        option.run();
 }
 
-function inputbox(customID) {
+function inputbox(option) {
+    const customID = option.id;
     const val = document.getElementById(customID).value;
     config.set(customID, val);
+    if (option.run)
+        option.run();
 }
 
-function sliderVal(customID) {
+function sliderVal(option) {
+    const customID = option.id;
     const slider = document.getElementById(customID);
     document.getElementById(`${customID}-label`).innerText = slider.value;
     config.set(customID, slider.value);
+    if (option.run)
+        option.run();
 }

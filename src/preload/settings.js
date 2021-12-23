@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
+/* eslint-disable no-case-declarations */
 const allSettings = require('../features/customSettings');
 const autoJoin = require('../features/autoJoin');
 const { ipcRenderer } = require('electron');
@@ -7,17 +8,15 @@ ipcRenderer.on('make-settings', () => {
     makeSettings();
 });
 
-let table;
-
 window.addEventListener('DOMContentLoaded', () => {
     const check = document.getElementsByClassName('about-wrapper');
     if (check.length > 0)
         return;
-    table = document.getElementsByTagName('table')[0];
-    makeSettings();
+    const table = document.getElementsByTagName('table')[0];
+    makeSettings(table);
 });
 
-function makeSettings() {
+function makeSettings(table) {
     allSettings.push(...autoJoin.settings);
     const doneCategories = [];
 
@@ -43,85 +42,110 @@ function makeSettings() {
     for (let i = 0; i < allSettings.length; i++) {
         const option = allSettings[i];
         const tableRow = document.createElement('tr');
-        let tempHTML = '';
+        const mainDIV = document.createElement('div');
+
+        const tdName = document.createElement('td');
+        tdName.width = '350vw';
+        const optName = document.createElement('label');
+        optName.innerText = option.name;
+        optName.id = 'name';
+        if (option.needsRestart) {
+            const optSpan = document.createElement('span');
+            optSpan.style = 'color: #eb5656';
+            optSpan.innerText = '*';
+            optName.appendChild(optSpan);
+        }
+        tdName.appendChild(optName);
+        const tdSpace = document.createElement('td');
+        tdSpace.innerText = '\u200b';
+
+        const tdValue = document.createElement('td');
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+
+        mainDIV.appendChild(tdName);
+        mainDIV.appendChild(tdSpace);
         switch (option.type) {
         case 'checkbox':
-            tempHTML = `
-                <td width="350vw">
-                    <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
-                </td>
-                <td width="250vw">\u200b</td>
-                <td>
-                    <label class = "toggle">
-                        <span class="check"></span>
-                        <input type="checkbox" id=${option.id} ${option.val ? 'checked' : ''} onclick='${option.type}("${option.id}")'>
-                        <span class="slider round"></span>
-                    </label>                  
-                </td>
-                `;
+            label.className = 'toggle';
+            const span1 = document.createElement('span');
+            span1.className = 'check';
+            label.appendChild(span1);
+
+            input.type = 'checkbox';
+            input.id = option.id;
+            option.val ? input.checked = true : input.checked = false;
+            option.onclick = () => checkbox(option);
+            label.appendChild(input);
+
+            const span2 = document.createElement('span');
+            span2.className = 'slider round';
+            label.appendChild(span2);
+
+            tdValue.appendChild(label);
+            mainDIV.appendChild(tdValue);
             break;
         case 'input':
-            tempHTML = `
-                <td width="350vw">
-                    <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
-                </td>
-                <td width="250vw">\u200b</td>
-                <td>
-                    <label class = "textbox">
-                        <span class="textbox"></span>
-                        <input ${option.password ? 'type="password"' : 'type="input"'} '' id=${option.id} ${option.placeholder ? `placeholder='${option.placeholder}'` : ''} value='${option.val}' oninput='inputbox("${option.id}")'>
-                        <span class="textbox"></span>
-                    </label>                  
-                </td>
-                `;
+            label.className = 'textbox';
+            option.password ? input.type = 'password' : input.type = 'input';
+            input.innerText = '';
+            input.id = option.id;
+            option.placeholder ? input.placeholder = option.placeholder : '';
+            input.value = option.val;
+            input.onchange = () => inputbox(option);
+
+            tdValue.appendChild(input);
+            mainDIV.appendChild(tdValue);
             break;
         case 'list':
-            // eslint-disable-next-line no-case-declarations
-            let optionValues;
-            if (option.isDynamic) {
-                const dynamicElement = document.getElementById(option.dynamicElement);
-                optionValues = option.values[dynamicElement.value];
-            } else
-                optionValues = option.values;
-            // eslint-disable-next-line no-case-declarations
-            let allOptions = '';
-            for (let j = 0; j < optionValues.length; j++)
-                allOptions += `<option value="${optionValues[j]}" ${optionValues[j] == option.val ? 'selected' : ''}>${optionValues[j]}</option>`;
+            const optionValues = option.values;
+            console.log('optVal:', optionValues);
 
-            tempHTML = `
-                <td width="350vw">
-                    <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
-                </td>
-                <td width="250vw">\u200b</td>
-                <td>
-                    <label class = "textbox">
-                        <select id="${option.id}" onchange='inputbox("${option.id}")'>
-                            ${allOptions}
-                        </select>
-                    </label>             
-                </td>
-                `;
+            const select = document.createElement('select');
+            select.id = option.id;
+            select.onchange = () => inputbox(option);
+
+            for (let j = 0; j < optionValues.length; j++) {
+                const opt = document.createElement('option');
+                opt.value = optionValues[j];
+                opt.innerText = optionValues[j];
+                optionValues[j] == option.val ? opt.selected = true : opt.selected = false;
+                select.appendChild(opt);
+            }
+            const optValue = document.createElement('label');
+            optValue.className = 'textbox';
+
+            optValue.appendChild(select);
+            tdValue.appendChild(optValue);
+
+            mainDIV.appendChild(tdValue);
             break;
         case 'slider':
-            tempHTML = `
-                <td width="350vw">
-                    <label id="name">${option.name}${option.needsRestart ? ' <span style="color: #eb5656">*</span>' : ''}</label>
-                </td>
-                <td width="250vw">\u200b</td>
-                <td>
-                    <div class="slidecontainer">
-                    <label class="textbox" id="${option.id}-label">
-                        ${option.val}
-                    </label>
-                        <input type="range" min="${option.min}" max="${option.max}" value="${option.val}" class="rangeSlider" id="${option.id}"
-                        oninput="sliderVal('${option.id}')">
-                    </div>               
-                </td>
-                `;
+            const div = document.createElement('div');
+            div.className = 'slidecontainer';
+
+            label.className = 'textbox';
+            label.id = `${option.id}-label`;
+            label.value = option.val;
+
+            input.type = 'range';
+            input.min = option.min;
+            input.max = option.max;
+            input.value = option.val;
+            input.className = 'rangeSlider';
+            input.id = option.id;
+            input.onchange = () => sliderVal(option);
+
+            div.appendChild(label);
+            div.appendChild(input);
+
+            tdValue.appendChild(div);
+            mainDIV.appendChild(tdValue);
+            break;
         }
         const category = document.getElementById(option.category);
         category.appendChild(tableRow);
-        tableRow.innerHTML = tempHTML;
+        tableRow.appendChild(mainDIV);
     }
     const endNote = document.createElement('tr');
     endNote.innerHTML = `<td>

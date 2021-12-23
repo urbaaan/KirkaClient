@@ -60,13 +60,7 @@ module.exports = {
             type: 'list',
             isDynamic: true,
             dynamicElement: 'AJ_prefGamemode',
-            values: {
-                'FFA': ['None', 'Village', 'Mirage', 'Cathedral'],
-                'TDM': ['None', 'Pool', 'Railyard', 'Temple'],
-                'Knife Only': ['None', 'Pool', 'Kharid'],
-                'Parkour': ['None', 'Flora', 'Tunnel', 'Time'],
-                'None': ['None']
-            },
+            values: ['None', 'Village', 'Mirage', 'Cathedral'],
             val: config.get('AJ_prefMap', 'None'),
         },
         {

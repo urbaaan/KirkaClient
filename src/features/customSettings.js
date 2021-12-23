@@ -1,3 +1,4 @@
+const { remote } = require('electron');
 const Store = require('electron-store');
 const config = new Store();
 
@@ -73,13 +74,23 @@ module.exports = [
         val: config.get('controlW', true),
     },
     {
+        name: 'Prevent M4 and M5 to go back and forward',
+        id: 'preventM4andM5',
+        category: 'Game',
+        type: 'checkbox',
+        val: config.get('preventM4andM5', true),
+    },
+    {
         name: 'In-game Chat Mode',
         id: 'chatType',
         category: 'Game',
         type: 'list',
-        values: ['Show', 'Hide'],
+        values: ['Show', 'Hide', 'While Focussed'],
         needsRestart: true,
         val: config.get('chatType', 'Show'),
+        run: (function run() {
+            remote.getCurrentWebContents().send('updateChat');
+        })
     },
     {
         name: 'Custom Sniper Scope',
