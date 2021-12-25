@@ -675,7 +675,7 @@ function checkbadge(user) {
     };
 
     let searchBadge = null;
-    if (preferred != 'None' && user != config.get('user'))
+    if (preferred != 'None' && user == config.get('user'))
         searchBadge = badgeValues[preferred];
 
     if (searchBadge)
