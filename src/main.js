@@ -128,15 +128,6 @@ function createWindow() {
         initBadges(socket);
         startTwitch(contents);
         ensureDirs();
-        const chatState = config.get('chatType', 'Show');
-        switch (chatState) {
-        case 'Hide':
-            win.webContents.send('chat', false, true, false);
-            break;
-        case 'While Focussed':
-            win.webContents.send('chat', false, true, true);
-            break;
-        }
     });
 
     function showWin() {
@@ -336,7 +327,6 @@ function createSettings() {
 
     setwin.once('ready-to-show', () => {
         setwin.show();
-        setwin.webContents.openDevTools();
     });
 
     setwin.on('close', () => {

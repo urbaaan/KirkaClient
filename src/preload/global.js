@@ -24,10 +24,8 @@ let badgesData;
 let chatFocus = false;
 let settings;
 let chatShowing;
-const chatState = true;
 const chatForce = true;
 let isChatFocus = false;
-
 let logDir;
 ipcRenderer.on('logDir', (e, val) => {
     logDir = val;
@@ -181,6 +179,16 @@ function doOnLoad() {
     if (config.get('showHP', true))
         observeHp();
 
+    const chatState = config.get('chatType', 'Show');
+    switch (chatState) {
+    case 'Hide':
+        setChatState(false, true, false);
+        break;
+    case 'While Focused':
+        setChatState(false, true, true);
+        break;
+    }
+
     const url = config.get('customScope');
     if (url) {
         setInterval(function() {
@@ -241,16 +249,12 @@ function observeHp() {
     document.querySelector('#app > div.game-interface > div.desktop-game-interface > div.state > div.hp > div.hp-title.text-1').innerText = '100';
 }
 
-ipcRenderer.on('chat', (event, state, force) => {
-    setChatState(state, force);
-});
-
 function setChatState(state, force, isFocusActive) {
     const chat = document.getElementsByClassName('chat chat-position')[0];
     isChatFocus = isFocusActive;
     if (chat === undefined) {
         if (force)
-            setTimeout(() => { setChatState(state, force); }, 1000);
+            setTimeout(() => { setChatState(state, force, isFocusActive); }, 1000);
         return;
     }
     if (state)
@@ -292,14 +296,18 @@ function createBalloon(text, error = false) {
 
 function toggleChat() {
     const chat = document.getElementsByClassName('chat chat-position')[0];
-    if (chat.style == 'display: flex;') {
+    const input = document.getElementById('WMNn');
+    if (document.activeElement == input) {
+        setTimeout(toggleChat, 100);
+        return;
+    }
+    if (chat.style.display == 'flex') {
         chat.blur();
-        setTimeout(() => {
-            chat.style = 'display: none;';
-        }, 100);
+        chat.style = 'display: none;';
     } else {
-        chat.state = 'display: flex;';
+        chat.style = 'display: flex;';
         chat.focus();
+        input.focus();
     }
 }
 
@@ -670,10 +678,9 @@ function checkbadge(user) {
     if (preferred != 'None' && user != config.get('user'))
         searchBadge = badgeValues[preferred];
 
-    if (searchBadge) {
-        if (badgesData[searchBadge].includes(user))
-            return getBadge(searchBadge, user, preferred);
-    } else {
+    if (searchBadge)
+        return getBadge(searchBadge, user, preferred);
+    else {
         const allPossible = [];
         const allTypes = Object.keys(badgesData);
         for (let i = 0; i < allTypes.length; i++) {

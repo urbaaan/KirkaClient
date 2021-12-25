@@ -85,7 +85,7 @@ module.exports = [
         id: 'chatType',
         category: 'Game',
         type: 'list',
-        values: ['Show', 'Hide', 'While Focussed'],
+        values: ['Show', 'Hide', 'While Focused'],
         needsRestart: true,
         val: config.get('chatType', 'Show'),
         run: (function run() {
