@@ -21,10 +21,7 @@ let recordedChunks = [];
 let recording = false;
 let paused = false;
 let badgesData;
-let chatFocus = false;
 let settings;
-let chatShowing;
-const chatForce = true;
 let isChatFocus = false;
 let logDir;
 ipcRenderer.on('logDir', (e, val) => {
@@ -131,20 +128,6 @@ function doOnLoad() {
             return;
         }
         promo.appendChild(div);
-        return;
-
-        // eslint-disable-next-line no-unreachable
-        const kirkaChat = document.getElementById('WMNn');
-        kirkaChat.addEventListener('focusout', (event) => {
-            chatFocus = false;
-            // setChatState(chatState, chatForce);
-        });
-
-        // eslint-disable-next-line no-unreachable
-        kirkaChat.addEventListener('focusin', (event) => {
-            chatFocus = true;
-            // setChatState(chatState, chatForce);
-        });
     }
 
     switch (state) {
@@ -179,15 +162,7 @@ function doOnLoad() {
     if (config.get('showHP', true))
         observeHp();
 
-    const chatState = config.get('chatType', 'Show');
-    switch (chatState) {
-    case 'Hide':
-        setChatState(false, true, false);
-        break;
-    case 'While Focused':
-        setChatState(false, true, true);
-        break;
-    }
+    updateChatState();
 
     const url = config.get('customScope');
     if (url) {
@@ -249,12 +224,26 @@ function observeHp() {
     document.querySelector('#app > div.game-interface > div.desktop-game-interface > div.state > div.hp > div.hp-title.text-1').innerText = '100';
 }
 
-function setChatState(state, force, isFocusActive) {
+function updateChatState() {
+    const chatState = config.get('chatType', 'Show');
+    switch (chatState) {
+    case 'Hide':
+        setChatState(false);
+        break;
+    case 'Show':
+        setChatState(true);
+        break;
+    case 'While Focused':
+        setChatState(false, true);
+        break;
+    }
+}
+
+function setChatState(state, isFocusActive = false) {
     const chat = document.getElementsByClassName('chat chat-position')[0];
     isChatFocus = isFocusActive;
     if (chat === undefined) {
-        if (force)
-            setTimeout(() => { setChatState(state, force, isFocusActive); }, 1000);
+        setTimeout(() => { setChatState(state, isFocusActive); }, 1000);
         return;
     }
     if (state)
@@ -348,7 +337,7 @@ window.addEventListener('keydown', function(event) {
 });
 
 ipcRenderer.on('updateChat', () => {
-    console.log('updating chat');
+    updateChatState();
 });
 
 const times = [];

@@ -75,7 +75,7 @@ function makeSettings(table) {
             input.type = 'checkbox';
             input.id = option.id;
             option.val ? input.checked = true : input.checked = false;
-            option.onclick = () => checkbox(option);
+            input.onchange = () => checkbox(option);
             label.appendChild(input);
 
             const span2 = document.createElement('span');

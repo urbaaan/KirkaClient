@@ -130,6 +130,19 @@ function createWindow() {
         ensureDirs();
     });
 
+    ipcMain.on('getContents', (event) => {
+        console.log('asking contents');
+        event.returnValue = win.id;
+    });
+
+    ipcMain.on('toggleRPC', () => {
+        const state = config.get('discordRPC');
+        if (state)
+            initRPC(socket, contents);
+        else
+            closeRPC();
+    });
+
     function showWin() {
         if (!canDestroy) {
             setTimeout(showWin, 500);
@@ -327,6 +340,7 @@ function createSettings() {
 
     setwin.once('ready-to-show', () => {
         setwin.show();
+        // setwin.webContents.openDevTools();
     });
 
     setwin.on('close', () => {

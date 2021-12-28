@@ -1,4 +1,4 @@
-const { remote } = require('electron');
+/* eslint-disable no-undef */
 const Store = require('electron-store');
 const config = new Store();
 
@@ -32,8 +32,10 @@ module.exports = [
         id: 'discordRPC',
         category: 'Performance',
         type: 'checkbox',
-        needsRestart: true,
         val: config.get('discordRPC', true),
+        run: (function() {
+            ipcRenderer.send('toggleRPC');
+        })
     },
     {
         name: 'Client Badges',
@@ -78,6 +80,7 @@ module.exports = [
         id: 'preventM4andM5',
         category: 'Game',
         type: 'checkbox',
+        needsRestart: true,
         val: config.get('preventM4andM5', true),
     },
     {
@@ -86,10 +89,9 @@ module.exports = [
         category: 'Game',
         type: 'list',
         values: ['Show', 'Hide', 'While Focused'],
-        needsRestart: true,
         val: config.get('chatType', 'Show'),
-        run: (function run() {
-            remote.getCurrentWebContents().send('updateChat');
+        run: (function run(contents) {
+            contents.send('updateChat');
         })
     },
     {
@@ -131,7 +133,6 @@ module.exports = [
         id: 'twitchChatSwap',
         category: 'Twitch',
         type: 'checkbox',
-        needsRestart: true,
         val: config.get('twitchChatSwap', false),
     },
     {
