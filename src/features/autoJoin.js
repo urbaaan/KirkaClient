@@ -58,8 +58,6 @@ module.exports = {
             id: 'AJ_prefMap',
             category: scriptName,
             type: 'list',
-            isDynamic: true,
-            dynamicElement: 'AJ_prefGamemode',
             values: ['None', 'Village', 'Mirage', 'Cathedral'],
             val: config.get('AJ_prefMap', 'None'),
         },

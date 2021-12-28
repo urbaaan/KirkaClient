@@ -647,7 +647,7 @@ function getBadge(type, user = null, role = null) {
                 };
             }
         }
-    } else {
+    } else if (badgesData[type].includes(user)) {
         return {
             type: type,
             url: badgeURLs[type],
@@ -688,11 +688,22 @@ function checkbadge(user) {
 
             if (badgesData[badgeType].includes(user))
                 allPossible.push(badgeType);
+            else if (badgeType == 'custom') {
+                const customBadges = badgesData.custom;
+                for (let j = 0; j < customBadges.length; j++) {
+                    const badgeData = customBadges[j];
+                    if (badgeData.name === user)
+                        allPossible.push('custom');
+                }
+            }
         }
 
-        if (allPossible.length)
+        if (allPossible.length) {
+            if (allPossible.includes('custom'))
+                return getBadge('custom', user);
             // eslint-disable-next-line no-undef
             return getBadge(allPossible[0], user, _.invert(badgeValues)[allPossible[0]]);
+        }
         return undefined;
     }
 }
