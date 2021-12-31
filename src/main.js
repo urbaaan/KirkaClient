@@ -22,7 +22,6 @@ let win;
 let splash;
 let setwin;
 let canDestroy = false;
-let CtrlW = false;
 let updateContent;
 let errTries = 0;
 let changeLogs;
@@ -105,14 +104,6 @@ function createWindow() {
 
     win.loadURL('https://kirka.io/');
 
-    win.on('close', function(e) {
-        if (CtrlW) {
-            e.preventDefault();
-            CtrlW = false;
-            return;
-        }
-        app.exit();
-    });
 
     win.webContents.on('new-window', function(event, url) {
         event.preventDefault();
@@ -227,7 +218,7 @@ function createShortcutKeys() {
     electronLocalshortcut.register(win, 'F11', () => win.setFullScreen(!win.isFullScreen()));
     electronLocalshortcut.register(win, 'F12', () => win.webContents.openDevTools());
     if (config.get('controlW', true))
-        electronLocalshortcut.register(win, 'Control+W', () => { CtrlW = true; });
+        electronLocalshortcut.register('Control+W', () => { return false; });
 }
 
 function checkkirka() {
@@ -235,15 +226,6 @@ function checkkirka() {
     if (urld.includes('https://kirka.io/games/'))
         win.loadURL(urld);
 }
-
-app.allowRendererProcessReuse = true;
-
-let icon;
-
-if (process.platform === 'linux')
-    icon = path.join(__dirname, 'media', 'icon.png');
-else
-    icon = path.join(__dirname, 'media', 'icon.ico');
 
 app.whenReady().then(() => createSplashWindow());
 
@@ -325,7 +307,7 @@ function createSettings() {
         height: 600,
         show: false,
         frame: true,
-        icon: icon,
+        icon: process.platform === 'linux' ? path.join(__dirname, 'media', 'icon.png') : icon = path.join(__dirname, 'media', 'icon.ico'),
         title: 'KirkaClient Settings',
         webPreferences: {
             nodeIntegration: true,
