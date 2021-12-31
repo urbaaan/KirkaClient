@@ -25,6 +25,7 @@ let canDestroy = false;
 let updateContent;
 let errTries = 0;
 let changeLogs;
+let icon = process.platform === 'linux' ? path.join(__dirname, 'media', 'icon.png') :  path.join(__dirname, 'media', 'icon.ico')
 
 socket.on('connect', () => {
     console.log('WebSocket Connected!');
@@ -307,7 +308,7 @@ function createSettings() {
         height: 600,
         show: false,
         frame: true,
-        icon: process.platform === 'linux' ? path.join(__dirname, 'media', 'icon.png') : icon = path.join(__dirname, 'media', 'icon.ico'),
+        icon: icon,
         title: 'KirkaClient Settings',
         webPreferences: {
             nodeIntegration: true,
