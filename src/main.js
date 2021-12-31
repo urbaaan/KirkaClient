@@ -27,6 +27,18 @@ let errTries = 0;
 let changeLogs;
 let icon = process.platform === 'linux' ? path.join(__dirname, 'media', 'icon.png') :  path.join(__dirname, 'media', 'icon.ico')
 
+if (config.get('unlimitedFPS', true))
+    app.commandLine.appendSwitch('disable-frame-rate-limit');
+
+['disable-gpu-vsync', 'ignore-gpu-blacklist', 'disable-breakpad','disable-print-preview', 'disable-metrics', 'disable-metrics-repo', 'enable-javascript-harmony', 'no-referrers', 'enable-quic', 'disable-2d-canvas-clip-aa', 'disable-bundled-ppapi-flash', 'disable-logging']
+	.forEach((name) => {
+		app.commandLine.appendSwitch(name)
+	})
+app.commandLine.appendSwitch('high-dpi-support', 1)
+
+
+app.whenReady().then(() => createSplashWindow());
+
 socket.on('connect', () => {
     console.log('WebSocket Connected!');
     const engine = socket.io.engine;
@@ -64,24 +76,7 @@ socket.on('message', (data) => {
 if (require('electron-squirrel-startup'))
     app.quit();
 
-if (config.get('unlimitedFPS', true))
-    app.commandLine.appendSwitch('disable-frame-rate-limit');
 
-
-app.commandLine.appendSwitch('disable-gpu-vsync');
-app.commandLine.appendSwitch('ignore-gpu-blacklist');
-app.commandLine.appendSwitch('disable-breakpad');
-app.commandLine.appendSwitch('disable-print-preview');
-app.commandLine.appendSwitch('disable-metrics');
-app.commandLine.appendSwitch('disable-metrics-repo');
-app.commandLine.appendSwitch('enable-javascript-harmony');
-app.commandLine.appendSwitch('no-referrers');
-app.commandLine.appendSwitch('enable-quic');
-app.commandLine.appendSwitch('high-dpi-support', 1);
-app.commandLine.appendSwitch('disable-2d-canvas-clip-aa');
-app.commandLine.appendSwitch('disable-bundled-ppapi-flash');
-app.commandLine.appendSwitch('disable-logging');
-app.commandLine.appendSwitch('disable-web-security');
 
 function createWindow() {
     win = new BrowserWindow({
@@ -227,8 +222,6 @@ function checkkirka() {
     if (urld.includes('https://kirka.io/games/'))
         win.loadURL(urld);
 }
-
-app.whenReady().then(() => createSplashWindow());
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
